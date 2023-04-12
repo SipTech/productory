@@ -16,10 +16,16 @@ RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 # Copy app files
-COPY . $APP_HOME/
+COPY productory $APP_HOME/productory/
+COPY manage.py $APP_HOME/
+
+# Make migrations and migrate the database
+RUN python manage.py makemigrations && \
+    python manage.py migrate && \
+    python manage.py loaddata */fixtures/*.json
 
 # Expose port
 EXPOSE 8000
 
 # Run the command to start the app
-CMD ["gunicorn", "productory_api.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "productory.wsgi:application", "--bind", "0.0.0.0:8000"]
