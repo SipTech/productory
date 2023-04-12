@@ -127,6 +127,9 @@ USE_TZ = True
 # CORS
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+]
 
 
 # Static files (CSS, JavaScript, Images)
