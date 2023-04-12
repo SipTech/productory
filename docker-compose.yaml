@@ -1,0 +1,55 @@
+version: '3'
+services:
+  productory-store:
+    image: mysql:8.0
+    container_name: productory-store
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    networks:
+      - product-net
+  productory-cache:
+    image: redis:latest
+    container_name: productory-cache
+    restart: always
+    networks:
+      - product-net
+  productory-api:
+    build: .
+    container_name: productory-api
+    restart: always
+    depends_on:
+      - productory-store
+    environment:
+      DEBUG: ${DEBUG}
+      APP_NAME: ${APP_NAME}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      SECRET_KEY: ${SECRET_KEY}
+      DB_PATH: ${DB_PATH}
+      DB_ENGINE: ${DB_ENGINE}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      CDN: ${CDN}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_PORT: ${EMAIL_PORT}
+      SERVER_PORT: ${SERVER_PORT}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_USER_EMAIL: ${ADMIN_USER_EMAIL}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    networks:
+      - product-net
+networks:
+  product-net:
+    driver: bridge

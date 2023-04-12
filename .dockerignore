@@ -1,0 +1,22 @@
+# Ignore files used in development
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.egg-info/
+.env
+
+# Ignore logs and other files
+logs/
+*.log
+*.pot
+
+# Ignore directories
+.git/
+venv/
+.venv/
+env/
+node_modules/
+media/
+staticfiles/
+static_root/

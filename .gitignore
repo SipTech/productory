@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local development env files
+.env
+*.sqlite3
+
+# Logs and other files
+logs/
+*.log
+*.pot
+*.pyc
+local_settings.py
+
+# Dependency directories
+venv/
+pipenv/
+.venv/
+env/
+env3/
+.venv3/
+.venv37/
+venv37/
+.idea/
+.vscode/
+.vs/
+npm-debug.log*
+
+# Django collected static files
+/staticfiles/
+/static_root/
+!.gitkeep
+
+# Ignore the secrets file for production
+secrets.yml
