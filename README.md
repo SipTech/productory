@@ -1,65 +1,137 @@
 Productory
 
-Productory is a containerized web application for managing products. It is built with Django and provides a RESTful API for creating, reading, updating, and deleting products.
+Productory is a web application built with Django and Django Rest Framework (DRF) that allows users to browse and purchase products, combos, promotions, and menus.
+
 
 Features
 
-Create, read, update, and delete products via a RESTful API.
-Authentication and authorization using JSON Web Tokens (JWT).
-Search products by name, description, price, and category.
-Filter products by category and price range.
-Paginate products.
-Cache product search results using Redis.
-Handle CORS requests.
-Logging and error reporting with Sentry.
-Unit and integration testing using pytest.
-Getting Started
 
-To get started with Productory, you will need to have Docker and Docker Compose installed on your machine.
+Browse products by category
+
+Add products to the cart
+
+Create combos by selecting multiple products
+
+Create promotions by selecting multiple combos and/or products
+
+Create menus by selecting multiple combos, products, promotions, and categories
+
+Manage products, combos, promotions, and menus via the admin interface
+
+Authentication and authorization using JSON Web Tokens (JWT)
+
+
+Installation and Setup
+
+Prerequisites
+
+
+Python 3.7 or higher
+
+Django 3.2 or higher
+
+Django Rest Framework (DRF) 3.12 or higher
+
+PostgreSQL 12 or higher
+
+Node.js 14 or higher (for running frontend development server)
+
+
+Installation
+
 
 Clone the repository:
-bash
-Copy code
-git clone https://github.com//productory.git
-cd productory
-Set environment variables:
-Productory uses environment variables for configuration. Create a .env file in the root directory of the project and add the following variables:
-makefile
-Copy code
-SECRET_KEY=
-DEBUG=1
-ALLOWED_HOSTS=localhost,127.0.0.1
-DB_ENGINE=mysql
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
-DB_PORT=
-REDIS_URL=redis://cache:6379/0
-SENTRY_DSN=
-Build and run the containers:
-css
-Copy code
-docker-compose up --build
-This will build the Docker images and start the containers.
-Run migrations:
-bash
-Copy code
-docker-compose exec web python manage.py migrate
-Create a superuser:
-bash
-Copy code
-docker-compose exec web python manage.py createsuperuser
-Access the application:
-Open your web browser and go to http://localhost:8000/admin/ to access the Django admin interface. Login with the superuser credentials created in the previous step.
-To access the API, go to http://localhost:8000/api/v1/.
-Run tests:
-To run the tests, execute the following command:
-bash
-Copy code
-docker-compose exec web pytest
+
+
+
+git clone https://github.com/username/Productory.git
+cd Productory
+
+
+Install Python dependencies:
+
+
+
+pip install -r requirements.txt
+
+
+Create a PostgreSQL database and update the database settings in Productory/settings.py:
+
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'productory_db',
+        'USER': 'your_db_username',
+        'PASSWORD': 'your_db_password',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
+
+
+Run database migrations:
+
+
+
+python manage.py migrate
+
+
+Load sample data:
+
+
+
+python manage.py loaddata fixtures/initial_data.json
+
+
+Install frontend dependencies:
+
+
+
+cd frontend
+npm install
+
+
+Build frontend assets:
+
+
+
+npm run build
+
+
+Run the development server:
+
+
+
+python manage.py runserver
+
+
+Visit http://localhost:8000 to view the application.
+
+
+Usage
+
+
+Browse products by category on the homepage
+
+Click on a product to view its details
+
+Click the "Add to cart" button to add the product to the cart
+
+Click on the cart icon to view the cart and update the quantity of each product
+
+Click on the "Checkout" button to proceed to the checkout page
+
+Enter your shipping and billing information and click "Place order" to complete the purchase
+
+
 Contributing
 
-If you would like to contribute to Productory, please fork the repository and submit a pull request.
+If you'd like to contribute to Productory, please fork the repository and make changes as you'd like. Pull requests are welcome.
 
-Please make sure that your code adheres to the PEP 8 style guide, and that your changes are thoroughly tested.
+
+License
+
+The code in this project is licensed under the MIT License.
+
