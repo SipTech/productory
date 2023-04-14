@@ -38,3 +38,9 @@ class Menu(models.Model):
     categories = models.ManyToManyField(Category)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+class Order(models.Model):
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    customer_name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Product, Combo, Promotion, Menu
+from .models import Category, Product, Combo, Promotion, Menu, Order
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,3 +35,9 @@ class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = '__all__'
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'menu', 'customer_name', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']

@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import Category, Product, Combo, Promotion, Menu
-from .serializers import CategorySerializer, ProductSerializer, ComboSerializer, PromotionSerializer, MenuSerializer
+from .models import Category, Product, Combo, Promotion, Menu, Order
+from .serializers import CategorySerializer, ProductSerializer, ComboSerializer, PromotionSerializer, MenuSerializer, OrderSerializer
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -31,5 +31,11 @@ class PromotionViewSet(viewsets.ModelViewSet):
 class MenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]

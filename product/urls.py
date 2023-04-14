@@ -22,6 +22,7 @@ router.register(r'products', views.ProductViewSet)
 router.register(r'combos', views.ComboViewSet)
 router.register(r'promotions', views.PromotionViewSet)
 router.register(r'menus', views.MenuViewSet)
+router.register(r'orders', views.OrderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
