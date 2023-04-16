@@ -23,12 +23,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY', '-7m27k8ca0wte2*83b5o8&hry(yr#^$pt_&(tn#yfj4rb$w!0d')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get('DEBUG', default=0))
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # JWT Token settings
 JWT_AUTH = {
@@ -50,7 +52,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'corsheaders',
-    'productory',
+    'drf_yasg',
+    'product',
 ]
 
 MIDDLEWARE = [
@@ -70,7 +73,7 @@ ROOT_URLCONF = 'productory.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['django.contrib.admin.templates.drf-yasg'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

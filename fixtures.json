@@ -1,20 +1,20 @@
 [
     {
-        "model": "productory.category",
+        "model": "product.category",
         "pk": 1,
         "fields": {
             "name": "Category 1"
         }
     },
     {
-        "model": "productory.category",
+        "model": "product.category",
         "pk": 2,
         "fields": {
             "name": "Category 2"
         }
     },
     {
-        "model": "productory.product",
+        "model": "product.product",
         "pk": 1,
         "fields": {
             "name": "Product 1",
@@ -23,7 +23,7 @@
         }
     },
     {
-        "model": "productory.product",
+        "model": "product.product",
         "pk": 2,
         "fields": {
             "name": "Product 2",
@@ -32,7 +32,7 @@
         }
     },
     {
-        "model": "productory.product",
+        "model": "product.product",
         "pk": 3,
         "fields": {
             "name": "Product 3",
@@ -41,7 +41,7 @@
         }
     },
     {
-        "model": "productory.product",
+        "model": "product.product",
         "pk": 4,
         "fields": {
             "name": "Product 4",
@@ -50,7 +50,7 @@
         }
     },
     {
-        "model": "productory.product",
+        "model": "product.product",
         "pk": 5,
         "fields": {
             "name": "Product 5",
@@ -59,7 +59,7 @@
         }
     },
     {
-        "model": "productory.combo",
+        "model": "product.combo",
         "pk": 1,
         "fields": {
             "name": "Combo 1",
@@ -69,7 +69,7 @@
         }
     },
     {
-        "model": "productory.combo",
+        "model": "product.combo",
         "pk": 2,
         "fields": {
             "name": "Combo 2",
@@ -79,7 +79,7 @@
         }
     },
     {
-        "model": "productory.promotion",
+        "model": "product.promotion",
         "pk": 1,
         "fields": {
             "name": "Promotion 1",
@@ -89,7 +89,7 @@
         }
     },
     {
-        "model": "productory.promotion",
+        "model": "product.promotion",
         "pk": 2,
         "fields": {
             "name": "Promotion 2",
@@ -99,7 +99,7 @@
         }
     },
     {
-        "model": "productory.menu",
+        "model": "product.menu",
         "pk": 1,
         "fields": {
             "combos": [1],

@@ -23,6 +23,7 @@ RUN pip install --upgrade pip && \
 
 # Copy app files
 COPY productory $APP_HOME/productory/
+COPY product $APP_HOME/product/
 COPY manage.py $APP_HOME/
 
 # Add script to create database user
@@ -33,7 +34,8 @@ RUN chmod +x $APP_HOME/create_db_user.sh && \
 # Make migrations and migrate the database
 COPY fixtures.json $APP_HOME/
 RUN python manage.py makemigrations && \
-    python manage.py migrate 
+    python manage.py migrate && \
+    python manage.py collectstatic
     #&& \
     #python manage.py loaddata fixtures.json
 

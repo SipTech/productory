@@ -2,7 +2,14 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Category, Product, Combo, Promotion, Menu, Order
-from .serializers import CategorySerializer, ProductSerializer, ComboSerializer, PromotionSerializer, MenuSerializer, OrderSerializer
+from .serializers import (
+    CategorySerializer, 
+    ProductSerializer, 
+    ComboSerializer, 
+    PromotionSerializer, 
+    MenuSerializer, 
+    OrderSerializer
+    )
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
