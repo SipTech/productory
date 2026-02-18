@@ -7,7 +7,7 @@ from django.db import models
 from django.utils import timezone
 
 from productory_catalog.models import Product
-from productory_core.currency import DEFAULT_CURRENCY
+from productory_core.currency import default_currency_code
 from productory_core.models import TimeStampedModel
 
 
@@ -20,7 +20,7 @@ class Bundle(TimeStampedModel):
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.00"))],
     )
-    currency = models.CharField(max_length=3, default=DEFAULT_CURRENCY)
+    currency = models.CharField(max_length=3, default=default_currency_code)
     is_active = models.BooleanField(default=True)
 
     class Meta:

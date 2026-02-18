@@ -32,7 +32,6 @@ def test_bundle_discount_is_applied(cart, product):
         name="Coffee Pair",
         slug="coffee-pair",
         bundle_price_amount=Decimal("20.00"),
-        currency="USD",
         is_active=True,
     )
     BundleItem.objects.create(bundle=bundle, product=product, quantity=2)

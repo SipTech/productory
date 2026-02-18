@@ -13,7 +13,7 @@ class ScopePermission(HasProductoryScope):
 
 def test_get_setting_reads_defaults(settings):
     settings.PRODUCTORY = {}
-    assert get_setting("DEFAULT_CURRENCY") == "USD"
+    assert get_setting("DEFAULT_CURRENCY") == "ZAR"
 
 
 def test_parse_scopes_handles_blank_values():

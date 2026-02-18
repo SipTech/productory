@@ -91,8 +91,8 @@ def _promotion_discount(cart: Cart) -> tuple[Decimal, str]:
     return best_discount, best_rule
 
 
-def resolve_cart_pricing(cart: Cart) -> PricingResolution:
-    base_subtotal = cart.subtotal_amount
+def resolve_cart_pricing(cart: Cart, *, base_subtotal: Decimal | None = None) -> PricingResolution:
+    resolved_subtotal = base_subtotal if base_subtotal is not None else cart.subtotal_amount
 
     bundle_discount, bundle_rule = _bundle_discount(cart)
     promo_discount, promo_rule = _promotion_discount(cart)
@@ -103,12 +103,12 @@ def resolve_cart_pricing(cart: Cart) -> PricingResolution:
         discount = promo_discount
         rule = promo_rule
 
-    final_total = (base_subtotal - discount).quantize(Decimal("0.01"))
+    final_total = (resolved_subtotal - discount).quantize(Decimal("0.01"))
     if final_total < Decimal("0.00"):
         final_total = Decimal("0.00")
 
     return PricingResolution(
-        base_subtotal=base_subtotal,
+        base_subtotal=resolved_subtotal,
         discount_amount=discount,
         final_total=final_total,
         rule=rule or "none",

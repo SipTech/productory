@@ -43,6 +43,11 @@ It also seeds demo data:
 - 6 bundles
 - 5 promotions (valid now until month end)
 
+Default store configuration is database-backed:
+- currency: `ZAR`
+- timezone: `Africa/Johannesburg`
+- VAT: `15%` with prices treated as VAT-inclusive by default
+
 Open `http://127.0.0.1:8010/api/` (default from `.env.example`).
 
 ```bash
@@ -50,6 +55,11 @@ make demo-logs
 make demo-stop
 make loaddata
 ```
+
+Update store config in Django admin:
+- `Currency`
+- `TaxRate`
+- `Store configuration`
 
 ## Dev Container
 

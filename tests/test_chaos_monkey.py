@@ -21,7 +21,7 @@ def test_chaos_monkey_cart_total_invariants_hold():
     rng = Random(2026)
 
     products = list(Promotion.objects.first().products.all()[:8])
-    cart = Cart.objects.create(email="chaos@example.com", currency="USD")
+    cart = Cart.objects.create(email="chaos@example.com")
 
     for _ in range(120):
         product = rng.choice(products)
@@ -46,7 +46,7 @@ def test_chaos_monkey_order_transitions_reject_invalid_paths():
     rng = Random(42)
 
     product = Promotion.objects.first().products.first()
-    cart = Cart.objects.create(email="chaos-order@example.com", currency="USD")
+    cart = Cart.objects.create(email="chaos-order@example.com")
     upsert_cart_item(cart, product.id, 2)
 
     order = create_order_from_cart(cart, email="chaos-order@example.com")

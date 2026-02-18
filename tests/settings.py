@@ -29,7 +29,7 @@ DATABASES = {
 }
 
 USE_TZ = True
-TIME_ZONE = "UTC"
+TIME_ZONE = "Africa/Johannesburg"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
@@ -41,7 +41,10 @@ REST_FRAMEWORK = {
 }
 
 PRODUCTORY = {
-    "DEFAULT_CURRENCY": "USD",
+    "DEFAULT_CURRENCY": "ZAR",
+    "DEFAULT_TIMEZONE": "Africa/Johannesburg",
+    "DEFAULT_TAX_RATE_PERCENT": "15.00",
+    "PRICE_INCLUDES_VAT": True,
     "ENABLE_PROMOTIONS": True,
     "ENABLE_WEBHOOKS": False,
 }

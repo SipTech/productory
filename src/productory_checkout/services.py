@@ -7,6 +7,7 @@ from django.db import transaction
 from productory_checkout.models import Cart, CartItem, CartStatus, Order, OrderItem, OrderStatus
 from productory_core.conf import get_setting
 from productory_core.hooks import emit_webhook_event, order_created, order_status_changed
+from productory_core.store import compute_tax_breakdown, get_store_pricing_policy
 
 _ALLOWED_TRANSITIONS = {
     OrderStatus.DRAFT: {OrderStatus.SUBMITTED, OrderStatus.CANCELED},
@@ -17,34 +18,75 @@ _ALLOWED_TRANSITIONS = {
 }
 
 
-def _resolve_promotional_total(cart: Cart) -> tuple[Decimal, Decimal]:
+def _resolve_promotional_total(cart: Cart, base_subtotal: Decimal) -> tuple[Decimal, Decimal]:
     if not get_setting("ENABLE_PROMOTIONS", True):
-        return Decimal("0.00"), cart.subtotal_amount
+        return Decimal("0.00"), base_subtotal
 
     try:
         from productory_promotions.services import resolve_cart_pricing
     except ImportError:
-        return Decimal("0.00"), cart.subtotal_amount
+        return Decimal("0.00"), base_subtotal
 
-    resolution = resolve_cart_pricing(cart)
+    resolution = resolve_cart_pricing(cart, base_subtotal=base_subtotal)
     return resolution.discount_amount, resolution.final_total
 
 
 @transaction.atomic
 def recompute_cart_totals(cart: Cart) -> Cart:
-    subtotal = Decimal("0.00")
+    pricing_policy = get_store_pricing_policy()
+    subtotal_base = Decimal("0.00")
     items = cart.items.select_related("product")
 
     for item in items:
         item.unit_price_snapshot = item.product.price_amount
         item.save(update_fields=["unit_price_snapshot", "updated_at"])
-        subtotal += item.unit_price_snapshot * item.quantity
+        subtotal_base += item.unit_price_snapshot * item.quantity
 
-    cart.subtotal_amount = subtotal.quantize(Decimal("0.01"))
-    discount_amount, total_amount = _resolve_promotional_total(cart)
-    cart.discount_amount = discount_amount
-    cart.total_amount = total_amount
-    cart.save(update_fields=["subtotal_amount", "discount_amount", "total_amount", "updated_at"])
+    subtotal_base = subtotal_base.quantize(Decimal("0.01"))
+    discount_base, total_base = _resolve_promotional_total(cart, subtotal_base)
+    if discount_base > subtotal_base:
+        discount_base = subtotal_base
+        total_base = Decimal("0.00")
+
+    subtotal_breakdown = compute_tax_breakdown(
+        subtotal_base,
+        vat_rate_percent=pricing_policy.vat_rate_percent,
+        price_includes_vat=pricing_policy.price_includes_vat,
+    )
+    total_breakdown = compute_tax_breakdown(
+        total_base,
+        vat_rate_percent=pricing_policy.vat_rate_percent,
+        price_includes_vat=pricing_policy.price_includes_vat,
+    )
+
+    cart.price_includes_vat = pricing_policy.price_includes_vat
+    cart.vat_rate_percent = pricing_policy.vat_rate_percent
+    cart.subtotal_excl_vat_amount = subtotal_breakdown.amount_excl_vat
+    cart.subtotal_incl_vat_amount = subtotal_breakdown.amount_incl_vat
+    cart.total_excl_vat_amount = total_breakdown.amount_excl_vat
+    cart.total_incl_vat_amount = total_breakdown.amount_incl_vat
+    cart.tax_amount = total_breakdown.vat_amount
+
+    # Keep canonical totals in VAT-inclusive terms.
+    cart.subtotal_amount = cart.subtotal_incl_vat_amount
+    cart.total_amount = cart.total_incl_vat_amount
+    cart.discount_amount = (cart.subtotal_amount - cart.total_amount).quantize(Decimal("0.01"))
+
+    cart.save(
+        update_fields=[
+            "price_includes_vat",
+            "vat_rate_percent",
+            "subtotal_amount",
+            "subtotal_excl_vat_amount",
+            "subtotal_incl_vat_amount",
+            "discount_amount",
+            "tax_amount",
+            "total_amount",
+            "total_excl_vat_amount",
+            "total_incl_vat_amount",
+            "updated_at",
+        ]
+    )
     return cart
 
 
@@ -104,9 +146,16 @@ def create_order_from_cart(
         email=email or cart.email,
         full_name=full_name,
         currency=cart.currency,
+        price_includes_vat=cart.price_includes_vat,
+        vat_rate_percent=cart.vat_rate_percent,
         subtotal_amount=cart.subtotal_amount,
+        subtotal_excl_vat_amount=cart.subtotal_excl_vat_amount,
+        subtotal_incl_vat_amount=cart.subtotal_incl_vat_amount,
         discount_amount=cart.discount_amount,
+        tax_amount=cart.tax_amount,
         total_amount=cart.total_amount,
+        total_excl_vat_amount=cart.total_excl_vat_amount,
+        total_incl_vat_amount=cart.total_incl_vat_amount,
         shipping_address_id=shipping_address_id,
         billing_address_id=billing_address_id,
     )

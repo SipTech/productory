@@ -29,7 +29,7 @@ curl -X POST "$BASE_URL/api/catalog/categories/" \
 ```bash
 curl -X POST "$BASE_URL/api/catalog/products/" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Single Origin","slug":"single-origin","sku":"COF-001","category_id":1,"price_amount":"12.50","currency":"USD","is_active":true}'
+  -d '{"name":"Single Origin","slug":"single-origin","sku":"COF-001","category_id":1,"price_amount":"12.50","currency":"ZAR","is_active":true}'
 ```
 
 ## Create cart + add item
@@ -37,7 +37,7 @@ curl -X POST "$BASE_URL/api/catalog/products/" \
 ```bash
 curl -X POST "$BASE_URL/api/checkout/carts/" \
   -H "Content-Type: application/json" \
-  -d '{"email":"buyer@example.com","currency":"USD"}'
+  -d '{"email":"buyer@example.com"}'
 
 curl -X POST "$BASE_URL/api/checkout/cart-items/" \
   -H "Content-Type: application/json" \
@@ -51,6 +51,13 @@ curl -X POST "$BASE_URL/api/checkout/checkout/" \
   -H "Content-Type: application/json" \
   -d '{"cart_id":1,"email":"buyer@example.com","full_name":"Buyer"}'
 ```
+
+Response includes both VAT-inclusive and VAT-exclusive totals:
+- `subtotal_excl_vat_amount`
+- `subtotal_incl_vat_amount`
+- `total_excl_vat_amount`
+- `total_incl_vat_amount`
+- `tax_amount`
 
 ## Transition order status
 

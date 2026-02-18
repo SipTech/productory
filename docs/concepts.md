@@ -28,5 +28,6 @@ Promotions are optional and decoupled from checkout:
 Business logic sits in service modules, not serializers/views:
 - `productory_checkout.services`
 - `productory_promotions.services`
+- `productory_core.store` (currency, timezone, VAT policy from DB config)
 
 This keeps API and admin layers thin.

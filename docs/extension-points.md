@@ -22,3 +22,8 @@ Use `productory_core.permissions` and `productory_core.scopes` to enforce API sc
 ## Pricing rules
 
 To customize discount behavior, extend `productory_promotions.services.resolve_cart_pricing` and call it from your checkout flow.
+
+## Store configuration
+
+Base currency, timezone, VAT rate, and VAT-inclusive/exclusive mode are stored in DB (`Currency`, `TaxRate`, `Store configuration` in admin).
+You can replace `productory_core.store.get_store_pricing_policy` in host-level service orchestration if you need tenant-specific behavior.

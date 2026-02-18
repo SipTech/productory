@@ -11,12 +11,22 @@ make demo-run
 
 `make demo-run` runs the demo stack in detached Docker mode and applies migrations.
 It seeds 10 categories, 10 collections, 50 products, stock, 6 bundles, and 5 month-end promotions.
+It also seeds store defaults in DB: `ZAR`, `Africa/Johannesburg`, VAT `15%` (prices VAT-inclusive).
 
 ```bash
 make demo-logs
 make demo-stop
 make loaddata
 ```
+
+## Store pricing configuration
+
+Open Django admin and configure:
+- `Currency`
+- `TaxRate`
+- `Store configuration`
+
+All new carts/products/bundles and checkout VAT calculations follow this DB config.
 
 ## Validate
 

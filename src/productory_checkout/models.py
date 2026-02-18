@@ -6,7 +6,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from productory_catalog.models import Product
-from productory_core.currency import DEFAULT_CURRENCY
+from productory_core.currency import default_currency_code
 from productory_core.models import TimeStampedModel
 
 
@@ -51,9 +51,28 @@ class Cart(TimeStampedModel):
         related_name="productory_carts",
     )
     email = models.EmailField(blank=True)
-    currency = models.CharField(max_length=3, default=DEFAULT_CURRENCY)
+    currency = models.CharField(max_length=3, default=default_currency_code)
+    price_includes_vat = models.BooleanField(default=True)
+    vat_rate_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
     status = models.CharField(max_length=20, choices=CartStatus.choices, default=CartStatus.OPEN)
     subtotal_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    subtotal_excl_vat_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    subtotal_incl_vat_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=Decimal("0.00"),
@@ -65,7 +84,25 @@ class Cart(TimeStampedModel):
         default=Decimal("0.00"),
         validators=[MinValueValidator(Decimal("0.00"))],
     )
+    tax_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
     total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    total_excl_vat_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    total_incl_vat_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=Decimal("0.00"),
@@ -114,8 +151,27 @@ class Order(TimeStampedModel):
         choices=OrderStatus.choices,
         default=OrderStatus.SUBMITTED,
     )
-    currency = models.CharField(max_length=3, default=DEFAULT_CURRENCY)
+    currency = models.CharField(max_length=3, default=default_currency_code)
+    price_includes_vat = models.BooleanField(default=True)
+    vat_rate_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
     subtotal_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    subtotal_excl_vat_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    subtotal_incl_vat_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=Decimal("0.00"),
@@ -134,6 +190,18 @@ class Order(TimeStampedModel):
         validators=[MinValueValidator(Decimal("0.00"))],
     )
     total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    total_excl_vat_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    total_incl_vat_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=Decimal("0.00"),

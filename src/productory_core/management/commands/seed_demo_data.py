@@ -6,14 +6,13 @@ from random import Random
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.utils import timezone
 
 from productory_catalog.models import Category, Collection, Product, StockRecord
 from productory_checkout.models import Address, Cart, CartItem, Order, OrderItem
+from productory_core.store import get_store_pricing_policy, store_now
 from productory_promotions.models import Bundle, BundleItem, Promotion, PromotionType
 
 RNG_SEED = 20260218
-CURRENCY = "USD"
 
 CATEGORY_NAMES = [
     "Coffee Beans",
@@ -83,12 +82,15 @@ class Command(BaseCommand):
         if options["reset"]:
             self._reset_all()
 
+        pricing_policy = get_store_pricing_policy()
         randomizer = Random(RNG_SEED)
         categories = self._seed_categories()
         collections = self._seed_collections()
-        products = self._seed_products(categories, collections, randomizer)
+        products = self._seed_products(
+            categories, collections, randomizer, currency_code=pricing_policy.currency_code
+        )
         self._seed_stock(products, randomizer)
-        bundles = self._seed_bundles(products)
+        bundles = self._seed_bundles(products, currency_code=pricing_policy.currency_code)
         self._seed_promotions(products, bundles)
 
         self.stdout.write(self.style.SUCCESS("Demo data seeded successfully."))
@@ -136,6 +138,8 @@ class Command(BaseCommand):
         categories: list[Category],
         collections: list[Collection],
         randomizer: Random,
+        *,
+        currency_code: str,
     ) -> list[Product]:
         created: list[Product] = []
 
@@ -156,7 +160,7 @@ class Command(BaseCommand):
                     "description": f"{name} prepared for demo usage.",
                     "category": category,
                     "price_amount": price_amount.quantize(Decimal("0.01")),
-                    "currency": CURRENCY,
+                    "currency": currency_code,
                     "is_active": True,
                 },
             )
@@ -179,7 +183,7 @@ class Command(BaseCommand):
                 defaults={"quantity": quantity, "allow_backorder": False},
             )
 
-    def _seed_bundles(self, products: list[Product]) -> list[Bundle]:
+    def _seed_bundles(self, products: list[Product], *, currency_code: str) -> list[Bundle]:
         bundles: list[Bundle] = []
 
         for idx in range(6):
@@ -191,7 +195,7 @@ class Command(BaseCommand):
                 defaults={
                     "name": name,
                     "bundle_price_amount": bundle_price,
-                    "currency": CURRENCY,
+                    "currency": currency_code,
                     "is_active": True,
                 },
             )
@@ -207,7 +211,7 @@ class Command(BaseCommand):
         return bundles
 
     def _seed_promotions(self, products: list[Product], bundles: list[Bundle]) -> None:
-        now = timezone.now()
+        now = store_now()
         last_day = calendar.monthrange(now.year, now.month)[1]
         month_end = now.replace(day=last_day, hour=23, minute=59, second=59, microsecond=0)
 

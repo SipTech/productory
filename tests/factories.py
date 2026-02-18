@@ -23,7 +23,6 @@ class ProductFactory(factory.django.DjangoModelFactory):
     sku = factory.Sequence(lambda n: f"SKU-{n:04d}")
     category = factory.SubFactory(CategoryFactory)
     price_amount = "12.50"
-    currency = "USD"
 
 
 class CartFactory(factory.django.DjangoModelFactory):
@@ -31,4 +30,3 @@ class CartFactory(factory.django.DjangoModelFactory):
         model = Cart
 
     email = factory.Sequence(lambda n: f"buyer{n}@example.com")
-    currency = "USD"

@@ -22,6 +22,8 @@ def test_seed_demo_data_creates_expected_dataset(db):
 
     quantities = list(StockRecord.objects.values_list("quantity", flat=True))
     assert all(5 <= qty <= 10 for qty in quantities)
+    assert set(Product.objects.values_list("currency", flat=True)) == {"ZAR"}
+    assert set(Bundle.objects.values_list("currency", flat=True)) == {"ZAR"}
 
     promo_types = set(Promotion.objects.values_list("promotion_type", flat=True))
     assert promo_types == {PromotionType.FIXED, PromotionType.PERCENTAGE}
@@ -30,10 +32,11 @@ def test_seed_demo_data_creates_expected_dataset(db):
     last_day = calendar.monthrange(now.year, now.month)[1]
     for promo in Promotion.objects.all():
         assert promo.start_at <= now
-        assert promo.end_at.day == last_day
-        assert promo.end_at.hour == 23
-        assert promo.end_at.minute == 59
-        assert promo.end_at.second == 59
+        localized_end_at = timezone.localtime(promo.end_at)
+        assert localized_end_at.day == last_day
+        assert localized_end_at.hour == 23
+        assert localized_end_at.minute == 59
+        assert localized_end_at.second == 59
         assert promo.value > Decimal("0.00")
 
 
