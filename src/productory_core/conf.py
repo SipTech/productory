@@ -9,6 +9,7 @@ DEFAULTS: dict[str, Any] = {
     "DEFAULT_TIMEZONE": "Africa/Johannesburg",
     "DEFAULT_TAX_RATE_PERCENT": "15.00",
     "PRICE_INCLUDES_VAT": True,
+    "DASHBOARD_KPI_CACHE_TTL_SECONDS": 120,
     "DEFAULT_PAGE_SIZE": 20,
     "ENABLE_PROMOTIONS": True,
     "ENABLE_WEBHOOKS": False,

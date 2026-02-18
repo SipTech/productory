@@ -72,3 +72,10 @@ curl -X POST "$BASE_URL/api/checkout/orders/1/transition/" \
 ```bash
 make show-urls
 ```
+
+## Internal dashboard KPIs (staff only)
+
+```bash
+curl -X GET "$BASE_URL/api/internal/dashboard/kpis/?date_from=2026-02-01&date_to=2026-02-18" \
+  -u admin:admin
+```
