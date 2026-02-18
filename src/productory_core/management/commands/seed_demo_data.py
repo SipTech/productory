@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import calendar
+from datetime import timedelta
 from decimal import Decimal
 from random import Random
 
@@ -8,11 +9,65 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from productory_catalog.models import Category, Collection, Product, StockRecord
-from productory_checkout.models import Address, Cart, CartItem, Order, OrderItem
+from productory_checkout.models import (
+    Address,
+    Cart,
+    CartItem,
+    Order,
+    OrderItem,
+)
+from productory_checkout.services import (
+    create_order_from_cart,
+    transition_order_status,
+    upsert_cart_item,
+)
 from productory_core.store import get_store_pricing_policy, store_now
 from productory_promotions.models import Bundle, BundleItem, Promotion, PromotionType
 
 RNG_SEED = 20260218
+ADDRESS_COUNT = 10
+ORDER_COUNT = 18
+OPEN_CART_COUNT = 8
+ABANDONED_CART_COUNT = 6
+
+FIRST_NAMES = [
+    "Sipho",
+    "Lebo",
+    "Aisha",
+    "Michael",
+    "Tariro",
+    "Nokuthula",
+    "Amira",
+    "Daniel",
+    "Zanele",
+    "Thabo",
+]
+
+LAST_NAMES = [
+    "Mkhize",
+    "Ndlovu",
+    "Patel",
+    "Smith",
+    "Chikore",
+    "Dlamini",
+    "Khan",
+    "Miller",
+    "Naidoo",
+    "Mokoena",
+]
+
+STREET_NAMES = [
+    "Main Road",
+    "Long Street",
+    "Bree Street",
+    "Oxford Road",
+    "Nelson Mandela Drive",
+    "Umhlanga Ridge Blvd",
+    "Florida Road",
+    "Jan Smuts Avenue",
+    "Loop Street",
+    "Rivonia Road",
+]
 
 CATEGORY_NAMES = [
     "Coffee Beans",
@@ -92,6 +147,8 @@ class Command(BaseCommand):
         self._seed_stock(products, randomizer)
         bundles = self._seed_bundles(products, currency_code=pricing_policy.currency_code)
         self._seed_promotions(products, bundles)
+        addresses = self._seed_addresses()
+        self._seed_sales(products, addresses, randomizer)
 
         self.stdout.write(self.style.SUCCESS("Demo data seeded successfully."))
 
@@ -244,6 +301,125 @@ class Command(BaseCommand):
                 product_slice = products[idx * 6 : (idx * 6) + 10]
                 promo.products.set(product_slice)
             promo.bundles.set(bundles[idx % len(bundles) : (idx % len(bundles)) + 2])
+
+    def _seed_addresses(self) -> list[Address]:
+        addresses: list[Address] = []
+        for idx in range(ADDRESS_COUNT):
+            address, _ = Address.objects.update_or_create(
+                line1=f"{100 + idx} {STREET_NAMES[idx]}",
+                postal_code=f"{2000 + idx}",
+                defaults={
+                    "first_name": FIRST_NAMES[idx],
+                    "last_name": LAST_NAMES[idx],
+                    "line2": "",
+                    "city": "Johannesburg" if idx % 2 == 0 else "Cape Town",
+                    "state": "Gauteng" if idx % 2 == 0 else "Western Cape",
+                    "country_code": "ZA",
+                },
+            )
+            addresses.append(address)
+        return addresses
+
+    def _seed_sales(
+        self,
+        products: list[Product],
+        addresses: list[Address],
+        randomizer: Random,
+    ) -> None:
+        now = store_now()
+        status_cycle: list[str] = ["fulfilled", "paid", "submitted", "canceled"]
+
+        for idx in range(ORDER_COUNT):
+            cart = Cart.objects.create(email=f"buyer{idx + 1}@example.com")
+            for product, quantity in self._cart_line_items(products, randomizer):
+                upsert_cart_item(cart, product.id, quantity)
+
+            shipping_address = addresses[idx % len(addresses)]
+            billing_address = addresses[(idx + 3) % len(addresses)]
+            order = create_order_from_cart(
+                cart,
+                email=cart.email,
+                full_name=f"{shipping_address.first_name} {shipping_address.last_name}",
+                shipping_address_id=shipping_address.id,
+                billing_address_id=billing_address.id,
+            )
+            self._set_order_status(order, status_cycle[idx % len(status_cycle)])
+
+            placed_at = now - timedelta(
+                days=idx * 2,
+                hours=randomizer.randint(0, 23),
+                minutes=randomizer.randint(0, 59),
+            )
+            cart_opened_at = placed_at - timedelta(hours=randomizer.randint(1, 6))
+            self._stamp_cart_and_items(cart, cart_opened_at, placed_at)
+            self._stamp_order_and_items(order, placed_at)
+
+        self._seed_non_converted_carts(
+            products,
+            randomizer,
+            now,
+            prefix="open",
+            status="open",
+            count=OPEN_CART_COUNT,
+        )
+        self._seed_non_converted_carts(
+            products,
+            randomizer,
+            now,
+            prefix="abandoned",
+            status="abandoned",
+            count=ABANDONED_CART_COUNT,
+        )
+
+    def _seed_non_converted_carts(
+        self,
+        products: list[Product],
+        randomizer: Random,
+        now,
+        *,
+        prefix: str,
+        status: str,
+        count: int,
+    ) -> None:
+        for idx in range(count):
+            cart = Cart.objects.create(email=f"{prefix}{idx + 1}@example.com")
+            for product, quantity in self._cart_line_items(products, randomizer):
+                upsert_cart_item(cart, product.id, quantity)
+
+            captured_at = now - timedelta(
+                days=randomizer.randint(0, 21),
+                hours=randomizer.randint(0, 23),
+                minutes=randomizer.randint(0, 59),
+            )
+            if status != "open":
+                Cart.objects.filter(pk=cart.pk).update(status=status)
+            self._stamp_cart_and_items(cart, captured_at, captured_at)
+
+    @staticmethod
+    def _cart_line_items(products: list[Product], randomizer: Random) -> list[tuple[Product, int]]:
+        line_count = randomizer.randint(1, 4)
+        selected = randomizer.sample(products, line_count)
+        return [(product, randomizer.randint(1, 3)) for product in selected]
+
+    @staticmethod
+    def _set_order_status(order: Order, target_status: str) -> None:
+        if target_status == "paid":
+            transition_order_status(order, "paid")
+        elif target_status == "fulfilled":
+            transition_order_status(order, "paid")
+            transition_order_status(order, "fulfilled")
+        elif target_status == "canceled":
+            transition_order_status(order, "canceled")
+
+    @staticmethod
+    def _stamp_cart_and_items(cart: Cart, created_at, updated_at) -> None:
+        Cart.objects.filter(pk=cart.pk).update(created_at=created_at, updated_at=updated_at)
+        CartItem.objects.filter(cart=cart).update(created_at=created_at, updated_at=updated_at)
+
+    @staticmethod
+    def _stamp_order_and_items(order: Order, timestamp) -> None:
+        Order.objects.filter(pk=order.pk).update(created_at=timestamp, updated_at=timestamp)
+        OrderItem.objects.filter(order=order).update(created_at=timestamp, updated_at=timestamp)
 
     @staticmethod
     def _slug(value: str) -> str:

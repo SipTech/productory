@@ -42,6 +42,9 @@ It also seeds demo data:
 - stock records (qty 5-10)
 - 6 bundles
 - 5 promotions (valid now until month end)
+- 10 addresses
+- 32 carts (open, converted, abandoned mix)
+- 18 orders (submitted, paid, fulfilled, canceled mix)
 
 Default store configuration is database-backed:
 - currency: `ZAR`

@@ -6,79 +6,138 @@
 <style>
   .productory-dashboard {
     margin-bottom: 2rem;
-    padding: 1.25rem;
-    background: #ffffff;
-    border: 1px solid #d9d9d9;
-    border-radius: 8px;
+    padding: 1.5rem;
+    background: var(--darkened-bg, var(--body-bg, #fff));
+    border: 1px solid var(--hairline-color, #d9d9d9);
+    border-radius: 10px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.06);
   }
+
   .productory-dashboard h2 {
     margin-top: 0;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    color: var(--body-fg, #111);
+    font-size: 1.35rem;
+    letter-spacing: 0.2px;
   }
+
   .productory-controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: 0.85rem;
+    margin-bottom: 1.2rem;
     align-items: end;
   }
+
   .productory-controls label {
     display: flex;
     flex-direction: column;
     font-weight: 600;
     font-size: 0.85rem;
-    color: #333;
+    color: var(--body-quiet-color, var(--body-fg, #444));
   }
+
   .productory-controls input {
     min-width: 10rem;
     margin-top: 0.35rem;
+    border: 1px solid var(--hairline-color, #cdd4dc);
+    background: var(--body-bg, #fff);
+    color: var(--body-fg, #111);
+    border-radius: 6px;
+    padding: 0.35rem 0.55rem;
   }
+
+  .productory-controls .button.default {
+    border-radius: 6px;
+    padding: 0.45rem 0.8rem;
+  }
+
   .productory-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1.1rem;
   }
+
   .productory-card {
-    background: #f8fafc;
-    border: 1px solid #dbe1e8;
-    border-radius: 6px;
-    padding: 0.75rem;
+    background: var(--body-bg, #fff);
+    border: 1px solid var(--hairline-color, #dbe1e8);
+    border-radius: 8px;
+    padding: 0.85rem;
+    position: relative;
+    overflow: hidden;
   }
+
+  .productory-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--primary, #2563eb),
+      var(--secondary, #0f766e),
+      var(--accent, #f97316)
+    );
+    opacity: 0.9;
+  }
+
   .productory-card .label {
     font-size: 0.78rem;
-    color: #666;
-    margin-bottom: 0.25rem;
+    color: var(--body-quiet-color, #666);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.15px;
   }
+
   .productory-card .value {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    color: #111;
+    color: var(--body-fg, #111);
   }
+
   .productory-charts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1rem;
   }
+
   .productory-chart-box {
-    border: 1px solid #dbe1e8;
-    border-radius: 6px;
-    padding: 0.75rem;
-    background: #fff;
+    border: 1px solid var(--hairline-color, #dbe1e8);
+    border-radius: 8px;
+    padding: 0.8rem;
+    background: var(--body-bg, #fff);
   }
+
   .productory-chart-box h3 {
     margin-top: 0;
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
+    margin-bottom: 0.65rem;
+    font-size: 0.98rem;
+    color: var(--body-fg, #111);
   }
+
   .productory-error {
-    color: #b91c1c;
+    color: #ef4444;
     font-weight: 600;
-    margin-top: 0.5rem;
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.06);
   }
+
   @media (max-width: 640px) {
     .productory-dashboard {
-      padding: 0.85rem;
+      padding: 0.9rem;
+    }
+
+    .productory-controls input {
+      min-width: 8.2rem;
+    }
+
+    .productory-card .value {
+      font-size: 1.12rem;
     }
   }
 </style>
@@ -138,6 +197,7 @@
 
 <script>
   (function () {
+    let latestPayload = null;
     let ordersChart;
     let cartsChart;
 
@@ -145,6 +205,7 @@
     const toInput = document.getElementById("kpi-to");
     const lowStockInput = document.getElementById("kpi-low-stock");
     const errorBox = document.getElementById("kpi-error");
+    const htmlRoot = document.documentElement;
 
     const setText = (id, value) => {
       const node = document.getElementById(id);
@@ -152,6 +213,24 @@
         node.textContent = value;
       }
     };
+
+    const cssVar = (name, fallback) => {
+      const value = getComputedStyle(htmlRoot).getPropertyValue(name).trim();
+      return value || fallback;
+    };
+
+    const chartTheme = () => ({
+      bodyColor: cssVar("--body-fg", "#111827"),
+      quietColor: cssVar("--body-quiet-color", "#6b7280"),
+      gridColor: cssVar("--hairline-color", "#d1d5db"),
+      primary: cssVar("--primary", "#2563eb"),
+      secondary: cssVar("--secondary", "#0f766e"),
+      accent: cssVar("--accent", "#f97316"),
+      info: "#0891b2",
+      success: "#16a34a",
+      warning: "#f59e0b",
+      danger: "#dc2626"
+    });
 
     const money = (currency, value) => `${currency} ${Number(value).toFixed(2)}`;
 
@@ -166,6 +245,13 @@
     };
 
     const renderCharts = (payload) => {
+      if (typeof Chart === "undefined") {
+        errorBox.textContent = "Chart library is unavailable. KPI values are still shown above.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      const palette = chartTheme();
       const orderStatuses = payload.orders.by_status || {};
       const orderLabels = Object.keys(orderStatuses);
       const orderValues = orderLabels.map((k) => Number(orderStatuses[k] || 0));
@@ -179,10 +265,26 @@
           labels: orderLabels,
           datasets: [{
             data: orderValues,
-            backgroundColor: ["#2563eb", "#0891b2", "#16a34a", "#f59e0b", "#dc2626"]
+            backgroundColor: [
+              palette.primary,
+              palette.info,
+              palette.success,
+              palette.warning,
+              palette.danger
+            ],
+            borderColor: cssVar("--body-bg", "#fff"),
+            borderWidth: 2
           }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: palette.bodyColor }
+            }
+          }
+        }
       });
 
       const cartValues = [
@@ -200,14 +302,26 @@
           labels: ["Open", "Converted", "Abandoned"],
           datasets: [{
             data: cartValues,
-            backgroundColor: ["#2563eb", "#16a34a", "#dc2626"]
+            backgroundColor: [palette.secondary, palette.success, palette.danger],
+            borderRadius: 8,
+            maxBarThickness: 54
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          plugins: { legend: { display: false }, tooltip: { enabled: true } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: palette.quietColor },
+              grid: { color: palette.gridColor }
+            },
+            x: {
+              ticks: { color: palette.bodyColor },
+              grid: { color: palette.gridColor }
+            }
+          }
         }
       });
     };
@@ -229,6 +343,7 @@
           throw new Error(`Dashboard API returned ${response.status}`);
         }
         const payload = await response.json();
+        latestPayload = payload;
 
         setText("kpi-currency", payload.currency);
         setText("kpi-gmv", money(payload.currency, payload.revenue.gmv_incl_vat));
@@ -251,6 +366,19 @@
     toInput.value = defaults.to;
 
     document.getElementById("kpi-refresh").addEventListener("click", fetchKpis);
+    [fromInput, toInput, lowStockInput].forEach((element) =>
+      element.addEventListener("change", fetchKpis)
+    );
+
+    if (window.MutationObserver) {
+      const observer = new MutationObserver(() => {
+        if (latestPayload) {
+          renderCharts(latestPayload);
+        }
+      });
+      observer.observe(htmlRoot, { attributes: true, attributeFilter: ["data-theme"] });
+    }
+
     fetchKpis();
   })();
 </script>

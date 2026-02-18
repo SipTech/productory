@@ -7,6 +7,7 @@ from django.core.management import call_command
 from django.utils import timezone
 
 from productory_catalog.models import Category, Collection, Product, StockRecord
+from productory_checkout.models import Address, Cart, CartStatus, Order, OrderStatus
 from productory_promotions.models import Bundle, Promotion, PromotionType
 
 
@@ -19,6 +20,9 @@ def test_seed_demo_data_creates_expected_dataset(db):
     assert StockRecord.objects.count() == 50
     assert Bundle.objects.count() == 6
     assert Promotion.objects.count() == 5
+    assert Address.objects.count() == 10
+    assert Cart.objects.count() == 32
+    assert Order.objects.count() == 18
 
     quantities = list(StockRecord.objects.values_list("quantity", flat=True))
     assert all(5 <= qty <= 10 for qty in quantities)
@@ -28,6 +32,17 @@ def test_seed_demo_data_creates_expected_dataset(db):
     promo_types = set(Promotion.objects.values_list("promotion_type", flat=True))
     assert promo_types == {PromotionType.FIXED, PromotionType.PERCENTAGE}
     assert Promotion.objects.filter(applies_to_all_products=True).count() == 1
+    assert set(Cart.objects.values_list("status", flat=True)) == {
+        CartStatus.OPEN,
+        CartStatus.CONVERTED,
+        CartStatus.ABANDONED,
+    }
+    assert set(Order.objects.values_list("status", flat=True)) == {
+        OrderStatus.SUBMITTED,
+        OrderStatus.PAID,
+        OrderStatus.FULFILLED,
+        OrderStatus.CANCELED,
+    }
 
     now = timezone.now()
     last_day = calendar.monthrange(now.year, now.month)[1]
@@ -51,3 +66,6 @@ def test_seed_demo_data_is_idempotent_with_reset(db):
     assert StockRecord.objects.count() == 50
     assert Bundle.objects.count() == 6
     assert Promotion.objects.count() == 5
+    assert Address.objects.count() == 10
+    assert Cart.objects.count() == 32
+    assert Order.objects.count() == 18
