@@ -1,0 +1,182 @@
+erDiagram
+  AUTH_USER {
+    int id PK
+  }
+
+  CURRENCY {
+    int id PK
+    string code UK
+    bool is_default
+  }
+
+  TAX_RATE {
+    int id PK
+    string code UK
+    decimal rate_percent
+    bool is_default
+  }
+
+  STORE_CONFIG {
+    int id PK
+    string slug UK
+    int default_currency_id FK
+    int default_tax_rate_id FK
+    bool price_includes_vat
+    string default_timezone
+  }
+
+  CATEGORY {
+    int id PK
+    string name UK
+    string slug UK
+  }
+
+  COLLECTION {
+    int id PK
+    string name UK
+    string slug UK
+  }
+
+  PRODUCT {
+    int id PK
+    int category_id FK
+    string sku UK
+    string slug UK
+    decimal price_amount
+    string currency
+    bool is_active
+  }
+
+  PRODUCT_IMAGE {
+    int id PK
+    int product_id FK
+    int position
+    string image_url
+  }
+
+  STOCK_RECORD {
+    int id PK
+    int product_id FK
+    int quantity
+    bool allow_backorder
+  }
+
+  ADDRESS {
+    int id PK
+    string first_name
+    string last_name
+    string country_code
+  }
+
+  CART {
+    int id PK
+    int customer_id FK
+    string email
+    string status
+    string currency
+    decimal vat_rate_percent
+    decimal total_amount
+  }
+
+  CART_ITEM {
+    int id PK
+    int cart_id FK
+    int product_id FK
+    int quantity
+    decimal unit_price_snapshot
+  }
+
+  ORDER {
+    int id PK
+    string number UK
+    int cart_id FK
+    int customer_id FK
+    int shipping_address_id FK
+    int billing_address_id FK
+    string status
+    string currency
+    decimal total_amount
+  }
+
+  ORDER_ITEM {
+    int id PK
+    int order_id FK
+    int product_id FK
+    int quantity
+    decimal unit_price_snapshot
+    decimal line_total
+  }
+
+  BUNDLE {
+    int id PK
+    string name UK
+    string slug UK
+    decimal bundle_price_amount
+    string currency
+    bool is_active
+  }
+
+  BUNDLE_ITEM {
+    int id PK
+    int bundle_id FK
+    int product_id FK
+    int quantity
+  }
+
+  PROMOTION {
+    int id PK
+    string name UK
+    string code UK
+    string promotion_type
+    decimal value
+    bool applies_to_all_products
+    datetime start_at
+    datetime end_at
+    bool is_active
+  }
+
+  AUDIT_EVENT {
+    int id PK
+    datetime created_at
+    string model_label
+    string object_pk
+    string action
+    int actor_id FK
+    string actor_display
+    json changes
+  }
+
+  STORE_CONFIG }o--|| CURRENCY : default_currency
+  STORE_CONFIG }o--o| TAX_RATE : default_tax_rate
+
+  CATEGORY ||--o{ PRODUCT : categorizes
+  PRODUCT ||--o{ PRODUCT_IMAGE : has
+  PRODUCT ||--o| STOCK_RECORD : inventory
+  PRODUCT }o--o{ COLLECTION : in_collections
+
+  AUTH_USER ||--o{ CART : customer_nullable
+  AUTH_USER ||--o{ ORDER : customer_nullable
+  CART ||--o{ CART_ITEM : contains
+  PRODUCT ||--o{ CART_ITEM : selected_as
+
+  CART o|--o{ ORDER : source_cart_nullable
+  ADDRESS ||--o{ ORDER : shipping_address
+  ADDRESS ||--o{ ORDER : billing_address
+  ORDER ||--o{ ORDER_ITEM : contains
+  PRODUCT o|--o{ ORDER_ITEM : snapshotted_product_nullable
+
+  BUNDLE ||--o{ BUNDLE_ITEM : contains
+  PRODUCT ||--o{ BUNDLE_ITEM : included_product
+
+  PRODUCT }o--o{ PROMOTION : eligible_products
+  BUNDLE }o--o{ PROMOTION : eligible_bundles
+
+  AUTH_USER ||--o{ AUDIT_EVENT : actor_nullable
+
+  CURRENCY ||--o{ AUDIT_EVENT : audited_concept
+  TAX_RATE ||--o{ AUDIT_EVENT : audited_concept
+  STORE_CONFIG ||--o{ AUDIT_EVENT : audited_concept
+  ORDER ||--o{ AUDIT_EVENT : audited_concept
+  STOCK_RECORD ||--o{ AUDIT_EVENT : audited_concept
+  BUNDLE ||--o{ AUDIT_EVENT : audited_concept
+  PROMOTION ||--o{ AUDIT_EVENT : audited_concept

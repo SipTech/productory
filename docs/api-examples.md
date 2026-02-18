@@ -10,6 +10,12 @@ make demo-run
 make loaddata
 ```
 
+Create a superuser for staff-only endpoints:
+
+```bash
+make superuser
+```
+
 Default base URL:
 
 ```bash
@@ -77,5 +83,5 @@ make show-urls
 
 ```bash
 curl -X GET "$BASE_URL/api/internal/dashboard/kpis/?date_from=2026-02-01&date_to=2026-02-18" \
-  -u admin:admin
+  -u <your-superuser-username>:<your-superuser-password>
 ```

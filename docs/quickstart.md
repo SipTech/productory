@@ -14,6 +14,11 @@ It seeds 10 categories, 10 collections, 50 products, stock, 6 bundles, and 5 mon
 It also seeds 10 addresses, 32 varied carts, and 18 varied orders for dashboard demos.
 It also seeds store defaults in DB: `ZAR`, `Africa/Johannesburg`, VAT `15%` (prices VAT-inclusive).
 The Django admin dashboard is branded and theme-aware (light/dark toggle).
+Create an admin account before using admin or staff-only KPI endpoints:
+
+```bash
+make superuser
+```
 
 ```bash
 make demo-logs
@@ -54,10 +59,10 @@ export DEMO_ENABLE_JWT=true
 make demo-run
 ```
 
-Get token:
+Get token (use the superuser credentials you created):
 
 ```bash
 curl -X POST http://127.0.0.1:8010/api/auth/token/ \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin"}'
+  -d '{"username": "<your-superuser-username>", "password": "<your-superuser-password>"}'
 ```

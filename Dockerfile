@@ -14,7 +14,7 @@ COPY src /app/src
 COPY demo /app/demo
 COPY tests /app/tests
 
-RUN pip install --upgrade pip && pip install -e .
+RUN pip install --upgrade pip && pip install -e '.[dev]'
 
 EXPOSE 8000
 

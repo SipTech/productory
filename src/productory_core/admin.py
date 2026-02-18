@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from django.contrib import admin
 
-from productory_core.models import Currency, StoreConfig, TaxRate
+from productory_core.models import AuditEvent, Currency, StoreConfig, TaxRate
 
 
 @admin.register(Currency)
@@ -33,3 +33,25 @@ class StoreConfigAdmin(admin.ModelAdmin):
     )
     search_fields = ("slug", "default_timezone")
     autocomplete_fields = ("default_currency", "default_tax_rate")
+
+
+@admin.register(AuditEvent)
+class AuditEventAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "model_label", "object_pk", "action", "actor_display")
+    list_filter = ("model_label", "action")
+    search_fields = ("model_label", "object_pk", "actor_display")
+    readonly_fields = (
+        "created_at",
+        "model_label",
+        "object_pk",
+        "action",
+        "actor",
+        "actor_display",
+        "changes",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

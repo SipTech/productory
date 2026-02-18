@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
@@ -86,3 +87,37 @@ class StoreConfig(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"StoreConfig<{self.default_currency.code}, {self.default_timezone}>"
+
+
+class AuditEvent(models.Model):
+    class Action(models.TextChoices):
+        CREATED = "created", "Created"
+        UPDATED = "updated", "Updated"
+        DELETED = "deleted", "Deleted"
+        RELATION_UPDATED = "relation_updated", "Relation Updated"
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    model_label = models.CharField(max_length=120)
+    object_pk = models.CharField(max_length=64)
+    action = models.CharField(max_length=20, choices=Action.choices)
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="productory_audit_events",
+    )
+    actor_display = models.CharField(max_length=255, blank=True)
+    changes = models.JSONField(default=dict)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(
+                fields=["model_label", "object_pk", "-created_at"],
+                name="prod_audit_lookup_idx",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"AuditEvent<{self.model_label}:{self.object_pk}:{self.action}>"

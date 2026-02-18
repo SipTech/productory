@@ -79,10 +79,7 @@ loaddata: ## Seed dynamic demo data in docker (50 products, bundles, promotions)
 	$(DC) exec $(API_SERVICE) python demo/manage.py seed_demo_data --reset
 
 show-urls: ## Print resolved Django URL patterns in docker
-	$(DC) exec -T $(API_SERVICE) python demo/manage.py shell -c "from django.urls import URLPattern, get_resolver; \
-	def walk(patterns, prefix=''): \
-	    [print(prefix + str(p.pattern)) if isinstance(p, URLPattern) else walk(p.url_patterns, prefix + str(p.pattern)) for p in patterns]; \
-	walk(get_resolver().url_patterns)"
+	$(DC) exec -T $(API_SERVICE) python demo/manage.py show_urls
 
 test: test-quick ## Run quick tests in docker
 

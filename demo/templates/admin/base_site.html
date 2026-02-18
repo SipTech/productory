@@ -301,8 +301,14 @@
 
 {% block extrahead %}
 {{ block.super }}
-<link rel="icon" href="{% static 'branding/favicon.ico' %}" sizes="any">
-<link rel="icon" type="image/png" href="{% static 'branding/favicon.png' %}">
+<link rel="icon" type="image/png" href="{% static 'branding/productory-mark-light.png' %}?v=2">
+<link
+  rel="icon"
+  type="image/png"
+  href="{% static 'branding/productory-mark-dark.png' %}?v=2"
+  media="(prefers-color-scheme: dark)"
+>
+<link rel="shortcut icon" href="{% static 'branding/productory-mark-light.png' %}?v=2">
 {% endblock %}
 
 {% block branding %}
