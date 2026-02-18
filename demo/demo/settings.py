@@ -3,8 +3,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "productory-oss-demo-key"
-DEBUG = True
+SECRET_KEY = os.getenv("DEMO_SECRET_KEY", "productory-oss-demo-key")
+DEBUG = os.getenv("DEMO_DEBUG", "true").lower() in {"1", "true", "yes", "on"}
 ALLOWED_HOSTS = [host for host in os.getenv("DEMO_ALLOWED_HOSTS", "*").split(",") if host]
 DEMO_ENABLE_JWT = os.getenv("DEMO_ENABLE_JWT", "false").lower() == "true"
 

@@ -10,7 +10,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - productory_pgdata:/var/lib/postgresql/data
+      - ${POSTGRES_DATA_PATH:-./.data/postgres}:/var/lib/postgresql/data
 
   productory-demo:
     build: .
@@ -19,18 +19,17 @@ services:
     depends_on:
       - productory-db
     environment:
-      DEMO_DB_ENGINE: django.db.backends.postgresql
-      DEMO_DB_NAME: ${POSTGRES_DB:-productory}
-      DEMO_DB_USER: ${POSTGRES_USER:-productory}
-      DEMO_DB_PASSWORD: ${POSTGRES_PASSWORD:-productory}
-      DEMO_DB_HOST: productory-db
-      DEMO_DB_PORT: 5432
+      DEMO_DB_ENGINE: ${DEMO_DB_ENGINE:-django.db.backends.postgresql}
+      DEMO_DB_NAME: ${DEMO_DB_NAME:-productory}
+      DEMO_DB_USER: ${DEMO_DB_USER:-productory}
+      DEMO_DB_PASSWORD: ${DEMO_DB_PASSWORD:-productory}
+      DEMO_DB_HOST: ${DEMO_DB_HOST:-productory-db}
+      DEMO_DB_PORT: ${DEMO_DB_PORT:-5432}
       DEMO_ALLOWED_HOSTS: ${DEMO_ALLOWED_HOSTS:-*}
       DEMO_ENABLE_JWT: ${DEMO_ENABLE_JWT:-false}
+      DEMO_SECRET_KEY: ${DEMO_SECRET_KEY:-productory-oss-demo-key}
+      DEMO_DEBUG: ${DEMO_DEBUG:-true}
     ports:
       - "${DEMO_PORT:-8000}:8000"
     volumes:
       - .:/app
-
-volumes:
-  productory_pgdata:
