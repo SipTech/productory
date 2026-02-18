@@ -9,6 +9,8 @@ make install-dev
 make demo-run
 ```
 
+`make install-dev` creates a local virtual environment at `.venv` (if missing) and installs dev dependencies there.
+
 `make demo-run` runs the demo stack in detached Docker mode and applies migrations.
 It seeds 10 categories, 10 collections, 50 products, stock, 6 bundles, and 5 month-end promotions.
 It also seeds 10 addresses, 32 varied carts, and 18 varied orders for dashboard demos.
