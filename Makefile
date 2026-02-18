@@ -5,7 +5,6 @@ COMPOSE_FILE ?= docker-compose.yaml
 ENV_FILE ?= .env.example
 API_SERVICE ?= productory-demo
 DB_SERVICE ?= productory-db
-FIXTURE ?= demo/fixtures/sample_data.json
 SERVICE ?= $(API_SERVICE)
 TEST ?=
 
@@ -13,7 +12,7 @@ DC := $(COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install-dev qa coverage demo-migrate demo-run demo-check up down restart logs ps migrations superuser drop-create-db loaddata show-urls test test-quick test-one test-all shell ipython
+.PHONY: help install-dev qa coverage demo-migrate demo-run demo-stop demo-logs demo-check up down restart logs ps migrations superuser drop-create-db loaddata show-urls test test-quick test-one test-all shell ipython
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*##' Makefile | sort | awk 'BEGIN {FS = ":.*## "}; {printf "%-18s %s\n", $$1, $$2}'
@@ -32,10 +31,19 @@ coverage: ## Run tests with coverage report
 	python3 -m coverage report
 
 demo-migrate: ## Run migrations for the demo project
-	python3 demo/manage.py migrate
+	$(DC) up -d $(DB_SERVICE) $(API_SERVICE)
+	$(DC) exec $(API_SERVICE) python demo/manage.py migrate
 
-demo-run: ## Run demo server
-	python3 demo/manage.py runserver
+demo-run: ## Run demo stack in detached docker mode
+	$(DC) up -d --build $(DB_SERVICE) $(API_SERVICE)
+	$(DC) exec $(API_SERVICE) python demo/manage.py migrate
+	$(DC) exec $(API_SERVICE) python demo/manage.py seed_demo_data --reset
+
+demo-stop: ## Stop detached demo docker stack
+	$(DC) down
+
+demo-logs: ## Tail demo container logs
+	$(DC) logs -f --tail=200 $(API_SERVICE)
 
 demo-check: ## Run Django checks for demo project
 	python3 demo/manage.py check
@@ -67,8 +75,8 @@ drop-create-db: ## Nuke Postgres DB (DROP + CREATE) and re-run migrations
 	$(DC) exec -T $(DB_SERVICE) sh -lc 'psql -U "$$POSTGRES_USER" -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='\''$$POSTGRES_DB'\'' AND pid <> pg_backend_pid();" -c "DROP DATABASE IF EXISTS \"$$POSTGRES_DB\";" -c "CREATE DATABASE \"$$POSTGRES_DB\";"'
 	$(DC) exec $(API_SERVICE) python demo/manage.py migrate
 
-loaddata: ## Load fixture data in docker (override with FIXTURE=<file>)
-	$(DC) exec $(API_SERVICE) python demo/manage.py loaddata $(FIXTURE)
+loaddata: ## Seed dynamic demo data in docker (50 products, bundles, promotions)
+	$(DC) exec $(API_SERVICE) python demo/manage.py seed_demo_data --reset
 
 show-urls: ## Print resolved Django URL patterns in docker
 	$(DC) exec -T $(API_SERVICE) python demo/manage.py shell -c "from django.urls import URLPattern, get_resolver; \

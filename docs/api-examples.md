@@ -6,14 +6,20 @@
 
 ```bash
 make install-dev
-make demo-migrate
 make demo-run
+make loaddata
+```
+
+Default base URL:
+
+```bash
+export BASE_URL=http://127.0.0.1:8010
 ```
 
 ## Create category
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/catalog/categories/ \
+curl -X POST "$BASE_URL/api/catalog/categories/" \
   -H "Content-Type: application/json" \
   -d '{"name":"Coffee","slug":"coffee","description":"Beans"}'
 ```
@@ -21,7 +27,7 @@ curl -X POST http://127.0.0.1:8000/api/catalog/categories/ \
 ## Create product
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/catalog/products/ \
+curl -X POST "$BASE_URL/api/catalog/products/" \
   -H "Content-Type: application/json" \
   -d '{"name":"Single Origin","slug":"single-origin","sku":"COF-001","category_id":1,"price_amount":"12.50","currency":"USD","is_active":true}'
 ```
@@ -29,11 +35,11 @@ curl -X POST http://127.0.0.1:8000/api/catalog/products/ \
 ## Create cart + add item
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/checkout/carts/ \
+curl -X POST "$BASE_URL/api/checkout/carts/" \
   -H "Content-Type: application/json" \
   -d '{"email":"buyer@example.com","currency":"USD"}'
 
-curl -X POST http://127.0.0.1:8000/api/checkout/cart-items/ \
+curl -X POST "$BASE_URL/api/checkout/cart-items/" \
   -H "Content-Type: application/json" \
   -d '{"cart_id":1,"product_id":1,"quantity":2}'
 ```
@@ -41,7 +47,7 @@ curl -X POST http://127.0.0.1:8000/api/checkout/cart-items/ \
 ## Checkout cart
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/checkout/checkout/ \
+curl -X POST "$BASE_URL/api/checkout/checkout/" \
   -H "Content-Type: application/json" \
   -d '{"cart_id":1,"email":"buyer@example.com","full_name":"Buyer"}'
 ```
@@ -49,7 +55,7 @@ curl -X POST http://127.0.0.1:8000/api/checkout/checkout/ \
 ## Transition order status
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/checkout/orders/1/transition/ \
+curl -X POST "$BASE_URL/api/checkout/orders/1/transition/" \
   -H "Content-Type: application/json" \
   -d '{"status":"paid"}'
 ```

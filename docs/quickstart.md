@@ -6,8 +6,16 @@
 
 ```bash
 make install-dev
-make demo-migrate
 make demo-run
+```
+
+`make demo-run` runs the demo stack in detached Docker mode and applies migrations.
+It seeds 10 categories, 10 collections, 50 products, stock, 6 bundles, and 5 month-end promotions.
+
+```bash
+make demo-logs
+make demo-stop
+make loaddata
 ```
 
 ## Validate
@@ -37,7 +45,7 @@ make demo-run
 Get token:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/auth/token/ \
+curl -X POST http://127.0.0.1:8010/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "admin"}'
 ```

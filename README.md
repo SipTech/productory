@@ -31,11 +31,25 @@ Productory is a complete rewrite as reusable Django apps for catalog, checkout, 
 
 ```bash
 make install-dev
-make demo-migrate
 make demo-run
 ```
 
-Open `http://127.0.0.1:8000/api/`.
+`make demo-run` starts the demo containers in detached Docker mode and applies migrations.
+It also seeds demo data:
+- 10 categories
+- 10 collections
+- 50 products
+- stock records (qty 5-10)
+- 6 bundles
+- 5 promotions (valid now until month end)
+
+Open `http://127.0.0.1:8010/api/` (default from `.env.example`).
+
+```bash
+make demo-logs
+make demo-stop
+make loaddata
+```
 
 ## Dev Container
 
@@ -44,7 +58,6 @@ If you use VS Code Dev Containers, open the repo in container and it will run `m
 Then run:
 
 ```bash
-make demo-migrate
 make demo-run
 ```
 
