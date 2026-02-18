@@ -1,0 +1,257 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .productory-dashboard {
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+  }
+  .productory-dashboard h2 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+  }
+  .productory-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    align-items: end;
+  }
+  .productory-controls label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #333;
+  }
+  .productory-controls input {
+    min-width: 10rem;
+    margin-top: 0.35rem;
+  }
+  .productory-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .productory-card {
+    background: #f8fafc;
+    border: 1px solid #dbe1e8;
+    border-radius: 6px;
+    padding: 0.75rem;
+  }
+  .productory-card .label {
+    font-size: 0.78rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+  }
+  .productory-card .value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #111;
+  }
+  .productory-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .productory-chart-box {
+    border: 1px solid #dbe1e8;
+    border-radius: 6px;
+    padding: 0.75rem;
+    background: #fff;
+  }
+  .productory-chart-box h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+  .productory-error {
+    color: #b91c1c;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+  @media (max-width: 640px) {
+    .productory-dashboard {
+      padding: 0.85rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <section class="productory-dashboard">
+    <h2>Store Dashboard</h2>
+    <div class="productory-controls">
+      <label>
+        From
+        <input type="date" id="kpi-from">
+      </label>
+      <label>
+        To
+        <input type="date" id="kpi-to">
+      </label>
+      <label>
+        Low Stock Threshold
+        <input type="number" id="kpi-low-stock" value="5" min="0" step="1">
+      </label>
+      <button type="button" class="button default" id="kpi-refresh">Refresh</button>
+    </div>
+
+    <div class="productory-cards">
+      <article class="productory-card"><div class="label">Currency</div><div class="value" id="kpi-currency">-</div></article>
+      <article class="productory-card"><div class="label">GMV (incl VAT)</div><div class="value" id="kpi-gmv">-</div></article>
+      <article class="productory-card"><div class="label">Net Sales</div><div class="value" id="kpi-net-sales">-</div></article>
+      <article class="productory-card"><div class="label">Discount Total</div><div class="value" id="kpi-discount">-</div></article>
+      <article class="productory-card"><div class="label">AOV</div><div class="value" id="kpi-aov">-</div></article>
+      <article class="productory-card"><div class="label">Orders (Paid)</div><div class="value" id="kpi-orders">-</div></article>
+      <article class="productory-card"><div class="label">Cart Conversion</div><div class="value" id="kpi-conversion">-</div></article>
+      <article class="productory-card"><div class="label">Out of Stock</div><div class="value" id="kpi-out-of-stock">-</div></article>
+    </div>
+
+    <div class="productory-charts">
+      <div class="productory-chart-box">
+        <h3>Orders by Status</h3>
+        <canvas id="orders-chart" height="190"></canvas>
+      </div>
+      <div class="productory-chart-box">
+        <h3>Cart Funnel</h3>
+        <canvas id="carts-chart" height="190"></canvas>
+      </div>
+    </div>
+    <div class="productory-error" id="kpi-error" style="display:none;"></div>
+  </section>
+
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+
+<script>
+  (function () {
+    let ordersChart;
+    let cartsChart;
+
+    const fromInput = document.getElementById("kpi-from");
+    const toInput = document.getElementById("kpi-to");
+    const lowStockInput = document.getElementById("kpi-low-stock");
+    const errorBox = document.getElementById("kpi-error");
+
+    const setText = (id, value) => {
+      const node = document.getElementById(id);
+      if (node) {
+        node.textContent = value;
+      }
+    };
+
+    const money = (currency, value) => `${currency} ${Number(value).toFixed(2)}`;
+
+    const getDefaultDates = () => {
+      const today = new Date();
+      const from = new Date(today);
+      from.setDate(from.getDate() - 6);
+      return {
+        from: from.toISOString().slice(0, 10),
+        to: today.toISOString().slice(0, 10)
+      };
+    };
+
+    const renderCharts = (payload) => {
+      const orderStatuses = payload.orders.by_status || {};
+      const orderLabels = Object.keys(orderStatuses);
+      const orderValues = orderLabels.map((k) => Number(orderStatuses[k] || 0));
+
+      if (ordersChart) {
+        ordersChart.destroy();
+      }
+      ordersChart = new Chart(document.getElementById("orders-chart"), {
+        type: "doughnut",
+        data: {
+          labels: orderLabels,
+          datasets: [{
+            data: orderValues,
+            backgroundColor: ["#2563eb", "#0891b2", "#16a34a", "#f59e0b", "#dc2626"]
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      const cartValues = [
+        Number(payload.carts.open || 0),
+        Number(payload.carts.converted || 0),
+        Number(payload.carts.abandoned || 0)
+      ];
+
+      if (cartsChart) {
+        cartsChart.destroy();
+      }
+      cartsChart = new Chart(document.getElementById("carts-chart"), {
+        type: "bar",
+        data: {
+          labels: ["Open", "Converted", "Abandoned"],
+          datasets: [{
+            data: cartValues,
+            backgroundColor: ["#2563eb", "#16a34a", "#dc2626"]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+    };
+
+    const fetchKpis = async () => {
+      errorBox.style.display = "none";
+      const params = new URLSearchParams({
+        date_from: fromInput.value,
+        date_to: toInput.value,
+        low_stock_threshold: lowStockInput.value || "5"
+      });
+
+      try {
+        const response = await fetch(`/api/internal/dashboard/kpis/?${params.toString()}`, {
+          headers: { "Accept": "application/json" },
+          credentials: "same-origin"
+        });
+        if (!response.ok) {
+          throw new Error(`Dashboard API returned ${response.status}`);
+        }
+        const payload = await response.json();
+
+        setText("kpi-currency", payload.currency);
+        setText("kpi-gmv", money(payload.currency, payload.revenue.gmv_incl_vat));
+        setText("kpi-net-sales", money(payload.currency, payload.revenue.net_sales));
+        setText("kpi-discount", money(payload.currency, payload.revenue.discount_total));
+        setText("kpi-aov", money(payload.currency, payload.revenue.aov_incl_vat));
+        setText("kpi-orders", `${payload.orders.total} (${payload.orders.paid})`);
+        setText("kpi-conversion", `${(Number(payload.carts.conversion_rate) * 100).toFixed(2)}%`);
+        setText("kpi-out-of-stock", payload.catalog.out_of_stock);
+
+        renderCharts(payload);
+      } catch (error) {
+        errorBox.textContent = `Could not load dashboard KPIs: ${error.message}`;
+        errorBox.style.display = "block";
+      }
+    };
+
+    const defaults = getDefaultDates();
+    fromInput.value = defaults.from;
+    toInput.value = defaults.to;
+
+    document.getElementById("kpi-refresh").addEventListener("click", fetchKpis);
+    fetchKpis();
+  })();
+</script>
+{% endblock %}
