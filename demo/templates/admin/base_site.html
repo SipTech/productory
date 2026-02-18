@@ -1,0 +1,335 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}Productory Ecommerce{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  html[data-theme="dark"] {
+    --primary: #0f3f63;
+    --secondary: #13a7a3;
+    --accent: #f05a22;
+    --primary-fg: #f7f7f7;
+    --body-fg: #eeeeee;
+    --body-bg: #0d1422;
+    --body-quiet-color: #c8d2df;
+    --body-medium-color: #d8e0ec;
+    --body-loud-color: #ffffff;
+    --breadcrumbs-link-fg: #e0e0e0;
+    --breadcrumbs-bg: #0d3551;
+    --link-fg: #5fd1ff;
+    --link-hover-color: #7de6ff;
+    --link-selected-fg: #8cb8ff;
+    --hairline-color: #223045;
+    --border-color: #2f4058;
+    --error-fg: #ff7a7a;
+    --message-success-bg: #065b2b;
+    --message-warning-bg: #6e3f09;
+    --message-error-bg: #731010;
+    --darkened-bg: #121d2e;
+    --selected-bg: #172338;
+    --selected-row: #173f49;
+    --close-button-bg: #2b3950;
+    --close-button-hover-bg: #47607e;
+    --header-bg: linear-gradient(120deg, #0a1a2f, #0f3f63 52%, #13a7a3);
+    --header-link-color: #f0fbff;
+    --header-branding-color: #f0fbff;
+    color-scheme: dark;
+  }
+
+  html[data-theme="light"],
+  :root {
+    --primary: #118bb2;
+    --secondary: #0e3f63;
+    --accent: #f05a22;
+    --primary-fg: #ffffff;
+    --body-fg: #203044;
+    --body-bg: #f5f8fc;
+    --body-quiet-color: #5a6b7d;
+    --body-medium-color: #35485d;
+    --body-loud-color: #101f31;
+    --header-color: #0b2f4b;
+    --header-branding-color: #0b2f4b;
+    --header-bg: linear-gradient(120deg, #ffffff, #e8f5ff 48%, #d5f8f7);
+    --header-link-color: #0b2f4b;
+    --breadcrumbs-fg: #d9edf8;
+    --breadcrumbs-link-fg: #f2fbff;
+    --breadcrumbs-bg: #0f4a71;
+    --link-fg: #0f567e;
+    --link-hover-color: #0d79ad;
+    --link-selected-fg: #0e3f63;
+    --hairline-color: #d6e2ef;
+    --border-color: #c8d5e3;
+    --error-fg: #ba2121;
+    --message-success-bg: #daf5e4;
+    --message-warning-bg: #fff0d4;
+    --message-error-bg: #ffefef;
+    --darkened-bg: #edf3f9;
+    --selected-bg: #dbe8f5;
+    --selected-row: #fef0db;
+    --button-fg: #ffffff;
+    --button-bg: #0e3f63;
+    --button-hover-bg: #0a304f;
+    --default-button-bg: #f05a22;
+    --default-button-hover-bg: #cb4616;
+    --close-button-bg: #687c90;
+    --close-button-hover-bg: #44586e;
+    --delete-button-bg: #b3261e;
+    --delete-button-hover-bg: #931b15;
+    --object-tools-fg: var(--button-fg);
+    --object-tools-bg: var(--close-button-bg);
+    --object-tools-hover-bg: var(--close-button-hover-bg);
+    --font-family-primary: "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-family-monospace: ui-monospace, Menlo, Monaco, "Roboto Mono", "Source Code Pro", monospace;
+    color-scheme: light;
+  }
+
+  #header {
+    border-bottom: 1px solid var(--hairline-color);
+    box-shadow: 0 10px 28px rgba(14, 48, 79, 0.14);
+  }
+
+  #site-name {
+    margin: 0;
+  }
+
+  .productory-brand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    text-decoration: none;
+    color: var(--header-link-color);
+  }
+
+  .productory-logo-wrap {
+    position: relative;
+    width: 62px;
+    height: 62px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.74),
+      rgba(225, 246, 252, 0.88)
+    );
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  html[data-theme="dark"] .productory-logo-wrap {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: linear-gradient(
+      145deg,
+      rgba(12, 26, 45, 0.88),
+      rgba(20, 67, 99, 0.88)
+    );
+  }
+
+  .productory-logo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    padding: 5px;
+  }
+
+  .productory-logo-dark {
+    display: none;
+  }
+
+  html[data-theme="dark"] .productory-logo-dark {
+    display: block;
+  }
+
+  html[data-theme="dark"] .productory-logo-light {
+    display: none;
+  }
+
+  .productory-brand-copy {
+    display: grid;
+    gap: 0.1rem;
+    line-height: 1.15;
+  }
+
+  .productory-brand-title {
+    font-size: 1.04rem;
+    font-weight: 700;
+    letter-spacing: 0.24px;
+    text-transform: uppercase;
+  }
+
+  .productory-brand-subtitle {
+    font-size: 0.75rem;
+    letter-spacing: 0.18px;
+    opacity: 0.86;
+    text-transform: uppercase;
+  }
+
+  #user-tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .theme-toggle {
+    position: relative;
+    width: 2.35rem;
+    height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(17, 139, 178, 0.35);
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.8), rgba(204, 240, 245, 0.92));
+    color: var(--secondary, #0e3f63);
+    box-shadow: 0 6px 14px rgba(14, 63, 99, 0.2);
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    transform: translateY(-1px);
+    border-color: rgba(240, 90, 34, 0.55);
+    box-shadow: 0 9px 18px rgba(14, 63, 99, 0.24);
+  }
+
+  .theme-toggle:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(14, 63, 99, 0.22);
+  }
+
+  .theme-toggle:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px rgba(240, 90, 34, 0.28),
+      0 0 0 4px rgba(240, 90, 34, 0.16);
+  }
+
+  .theme-toggle svg {
+    width: 1.12rem;
+    height: 1.12rem;
+    display: block;
+    opacity: 0.98;
+  }
+
+  .theme-toggle .theme-icon-when-auto,
+  .theme-toggle .theme-icon-when-dark,
+  .theme-toggle .theme-icon-when-light {
+    display: none !important;
+  }
+
+  html[data-theme="light"] .theme-toggle .theme-icon-when-dark {
+    display: inline-block !important;
+  }
+
+  html[data-theme="dark"] .theme-toggle .theme-icon-when-light {
+    display: inline-block !important;
+  }
+
+  html[data-theme="auto"] .theme-toggle .theme-icon-when-dark {
+    display: inline-block !important;
+  }
+
+  html[data-theme="dark"] .theme-toggle {
+    border-color: rgba(95, 209, 255, 0.34);
+    background: linear-gradient(145deg, rgba(20, 34, 55, 0.9), rgba(22, 83, 118, 0.92));
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.36);
+  }
+
+  html[data-theme="dark"] .theme-toggle:hover {
+    border-color: rgba(240, 90, 34, 0.62);
+    box-shadow: 0 9px 22px rgba(0, 0, 0, 0.42);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="auto"] .theme-toggle .theme-icon-when-dark {
+      display: none !important;
+    }
+
+    html[data-theme="auto"] .theme-toggle .theme-icon-when-light {
+      display: inline-block !important;
+    }
+
+    html[data-theme="auto"] .theme-toggle {
+      border-color: rgba(95, 209, 255, 0.34);
+      background: linear-gradient(145deg, rgba(20, 34, 55, 0.9), rgba(22, 83, 118, 0.92));
+      color: #ffffff;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.36);
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="auto"] .productory-logo-dark {
+      display: block;
+    }
+
+    html[data-theme="auto"] .productory-logo-light {
+      display: none;
+    }
+
+    html[data-theme="auto"] .productory-logo-wrap {
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(11, 22, 38, 0.62);
+    }
+  }
+
+  @media (max-width: 860px) {
+    .productory-logo-wrap {
+      width: 52px;
+      height: 52px;
+    }
+
+    .productory-brand-subtitle {
+      display: none;
+    }
+
+    .theme-toggle {
+      width: 2.1rem;
+      height: 2.1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="icon" type="image/png" href="{% static 'branding/productory-mark-light.png' %}?v=2">
+<link
+  rel="icon"
+  type="image/png"
+  href="{% static 'branding/productory-mark-dark.png' %}?v=2"
+  media="(prefers-color-scheme: dark)"
+>
+<link rel="shortcut icon" href="{% static 'branding/productory-mark-light.png' %}?v=2">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}" class="productory-brand-link">
+    <span class="productory-logo-wrap" aria-hidden="true">
+      <img
+        src="{% static 'branding/productory-mark-light.png' %}"
+        alt=""
+        class="productory-logo productory-logo-light"
+      >
+      <img
+        src="{% static 'branding/productory-mark-dark.png' %}"
+        alt=""
+        class="productory-logo productory-logo-dark"
+      >
+    </span>
+    <span class="productory-brand-copy">
+      <span class="productory-brand-title">Productory Ecommerce</span>
+      <span class="productory-brand-subtitle">Commerce Command Center</span>
+    </span>
+  </a>
+</h1>
+{% endblock %}

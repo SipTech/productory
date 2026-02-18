@@ -1,0 +1,420 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .productory-dashboard {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--darkened-bg, var(--body-bg, #fff));
+    border: 1px solid var(--hairline-color, #d9d9d9);
+    border-radius: 10px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .productory-dashboard::before {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 220px;
+    height: 220px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(240, 90, 34, 0.24), rgba(240, 90, 34, 0));
+    pointer-events: none;
+  }
+
+  .productory-dashboard h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--body-fg, #111);
+    font-size: 1.35rem;
+    letter-spacing: 0.2px;
+    position: relative;
+  }
+
+  .productory-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-bottom: 1.2rem;
+    align-items: end;
+  }
+
+  .productory-controls label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--body-quiet-color, var(--body-fg, #444));
+  }
+
+  .productory-controls input {
+    min-width: 10rem;
+    margin-top: 0.35rem;
+    border: 1px solid var(--hairline-color, #cdd4dc);
+    background: var(--body-bg, #fff);
+    color: var(--body-fg, #111);
+    border-radius: 6px;
+    padding: 0.35rem 0.55rem;
+  }
+
+  .productory-controls .button.default {
+    border-radius: 6px;
+    padding: 0.45rem 0.8rem;
+  }
+
+  .productory-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1.1rem;
+    position: relative;
+  }
+
+  .productory-card {
+    background: var(--body-bg, #fff);
+    border: 1px solid var(--hairline-color, #dbe1e8);
+    border-radius: 8px;
+    padding: 0.85rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .productory-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--primary, #2563eb),
+      var(--secondary, #0f766e),
+      var(--accent, #f97316)
+    );
+    opacity: 0.9;
+  }
+
+  .productory-card .label {
+    font-size: 0.78rem;
+    color: var(--body-quiet-color, #666);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.15px;
+  }
+
+  .productory-card .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--body-fg, #111);
+  }
+
+  .productory-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    position: relative;
+  }
+
+  .productory-chart-box {
+    border: 1px solid var(--hairline-color, #dbe1e8);
+    border-radius: 8px;
+    padding: 0.8rem;
+    background: var(--body-bg, #fff);
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .productory-chart-box h3 {
+    margin-top: 0;
+    margin-bottom: 0.65rem;
+    font-size: 0.98rem;
+    color: var(--body-fg, #111);
+  }
+
+  .productory-chart-canvas {
+    position: relative;
+    min-height: 240px;
+    height: 240px;
+  }
+
+  .productory-chart-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .productory-error {
+    color: #ef4444;
+    font-weight: 600;
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.06);
+  }
+
+  @media (max-width: 640px) {
+    .productory-dashboard {
+      padding: 0.9rem;
+    }
+
+    .productory-controls input {
+      min-width: 8.2rem;
+    }
+
+    .productory-card .value {
+      font-size: 1.12rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <section class="productory-dashboard">
+    <h2>Store Dashboard</h2>
+    <div class="productory-controls">
+      <label>
+        From
+        <input type="date" id="kpi-from">
+      </label>
+      <label>
+        To
+        <input type="date" id="kpi-to">
+      </label>
+      <label>
+        Low Stock Threshold
+        <input type="number" id="kpi-low-stock" value="5" min="0" step="1">
+      </label>
+      <button type="button" class="button default" id="kpi-refresh">Refresh</button>
+    </div>
+
+    <div class="productory-cards">
+      <article class="productory-card"><div class="label">Currency</div><div class="value" id="kpi-currency">-</div></article>
+      <article class="productory-card"><div class="label">GMV (incl VAT)</div><div class="value" id="kpi-gmv">-</div></article>
+      <article class="productory-card"><div class="label">Net Sales</div><div class="value" id="kpi-net-sales">-</div></article>
+      <article class="productory-card"><div class="label">Discount Total</div><div class="value" id="kpi-discount">-</div></article>
+      <article class="productory-card"><div class="label">AOV</div><div class="value" id="kpi-aov">-</div></article>
+      <article class="productory-card"><div class="label">Orders (Paid)</div><div class="value" id="kpi-orders">-</div></article>
+      <article class="productory-card"><div class="label">Cart Conversion</div><div class="value" id="kpi-conversion">-</div></article>
+      <article class="productory-card"><div class="label">Out of Stock</div><div class="value" id="kpi-out-of-stock">-</div></article>
+    </div>
+
+    <div class="productory-charts">
+      <div class="productory-chart-box">
+        <h3>Orders by Status</h3>
+        <div class="productory-chart-canvas">
+          <canvas id="orders-chart"></canvas>
+        </div>
+      </div>
+      <div class="productory-chart-box">
+        <h3>Cart Funnel</h3>
+        <div class="productory-chart-canvas">
+          <canvas id="carts-chart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="productory-error" id="kpi-error" style="display:none;"></div>
+  </section>
+
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+
+<script>
+  (function () {
+    let latestPayload = null;
+    let ordersChart;
+    let cartsChart;
+
+    const fromInput = document.getElementById("kpi-from");
+    const toInput = document.getElementById("kpi-to");
+    const lowStockInput = document.getElementById("kpi-low-stock");
+    const errorBox = document.getElementById("kpi-error");
+    const htmlRoot = document.documentElement;
+
+    const setText = (id, value) => {
+      const node = document.getElementById(id);
+      if (node) {
+        node.textContent = value;
+      }
+    };
+
+    const cssVar = (name, fallback) => {
+      const value = getComputedStyle(htmlRoot).getPropertyValue(name).trim();
+      return value || fallback;
+    };
+
+    const chartTheme = () => ({
+      bodyColor: cssVar("--body-fg", "#111827"),
+      quietColor: cssVar("--body-quiet-color", "#6b7280"),
+      gridColor: cssVar("--hairline-color", "#d1d5db"),
+      primary: cssVar("--primary", "#118bb2"),
+      secondary: cssVar("--secondary", "#0e3f63"),
+      accent: cssVar("--accent", "#f05a22"),
+      info: "#22d3ee",
+      success: "#14b8a6",
+      warning: "#f59e0b",
+      danger: "#ef4444"
+    });
+
+    const money = (currency, value) => `${currency} ${Number(value).toFixed(2)}`;
+
+    const getDefaultDates = () => {
+      const today = new Date();
+      const from = new Date(today);
+      from.setDate(from.getDate() - 6);
+      return {
+        from: from.toISOString().slice(0, 10),
+        to: today.toISOString().slice(0, 10)
+      };
+    };
+
+    const renderCharts = (payload) => {
+      if (typeof Chart === "undefined") {
+        errorBox.textContent = "Chart library is unavailable. KPI values are still shown above.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      const palette = chartTheme();
+      const orderStatuses = payload.orders.by_status || {};
+      const orderLabels = Object.keys(orderStatuses);
+      const orderValues = orderLabels.map((k) => Number(orderStatuses[k] || 0));
+
+      if (ordersChart) {
+        ordersChart.destroy();
+      }
+      ordersChart = new Chart(document.getElementById("orders-chart"), {
+        type: "doughnut",
+        data: {
+          labels: orderLabels,
+          datasets: [{
+            data: orderValues,
+            backgroundColor: [
+              palette.primary,
+              palette.info,
+              palette.success,
+              palette.warning,
+              palette.danger
+            ],
+            borderColor: cssVar("--body-bg", "#fff"),
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: palette.bodyColor }
+            }
+          }
+        }
+      });
+
+      const cartValues = [
+        Number(payload.carts.open || 0),
+        Number(payload.carts.converted || 0),
+        Number(payload.carts.abandoned || 0)
+      ];
+
+      if (cartsChart) {
+        cartsChart.destroy();
+      }
+      cartsChart = new Chart(document.getElementById("carts-chart"), {
+        type: "bar",
+        data: {
+          labels: ["Open", "Converted", "Abandoned"],
+          datasets: [{
+            data: cartValues,
+            backgroundColor: [palette.secondary, palette.success, palette.danger],
+            borderRadius: 8,
+            maxBarThickness: 54
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: true } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: palette.quietColor },
+              grid: { color: palette.gridColor }
+            },
+            x: {
+              ticks: { color: palette.bodyColor },
+              grid: { color: palette.gridColor }
+            }
+          }
+        }
+      });
+    };
+
+    const fetchKpis = async () => {
+      errorBox.style.display = "none";
+      const params = new URLSearchParams({
+        date_from: fromInput.value,
+        date_to: toInput.value,
+        low_stock_threshold: lowStockInput.value || "5"
+      });
+
+      try {
+        const response = await fetch(`/api/internal/dashboard/kpis/?${params.toString()}`, {
+          headers: { "Accept": "application/json" },
+          credentials: "same-origin"
+        });
+        if (!response.ok) {
+          throw new Error(`Dashboard API returned ${response.status}`);
+        }
+        const payload = await response.json();
+        latestPayload = payload;
+
+        setText("kpi-currency", payload.currency);
+        setText("kpi-gmv", money(payload.currency, payload.revenue.gmv_incl_vat));
+        setText("kpi-net-sales", money(payload.currency, payload.revenue.net_sales));
+        setText("kpi-discount", money(payload.currency, payload.revenue.discount_total));
+        setText("kpi-aov", money(payload.currency, payload.revenue.aov_incl_vat));
+        setText("kpi-orders", `${payload.orders.total} (${payload.orders.paid})`);
+        setText("kpi-conversion", `${(Number(payload.carts.conversion_rate) * 100).toFixed(2)}%`);
+        setText("kpi-out-of-stock", payload.catalog.out_of_stock);
+
+        renderCharts(payload);
+      } catch (error) {
+        errorBox.textContent = `Could not load dashboard KPIs: ${error.message}`;
+        errorBox.style.display = "block";
+      }
+    };
+
+    const defaults = getDefaultDates();
+    fromInput.value = defaults.from;
+    toInput.value = defaults.to;
+
+    document.getElementById("kpi-refresh").addEventListener("click", fetchKpis);
+    [fromInput, toInput, lowStockInput].forEach((element) =>
+      element.addEventListener("change", fetchKpis)
+    );
+
+    if (window.MutationObserver) {
+      const observer = new MutationObserver(() => {
+        if (latestPayload) {
+          renderCharts(latestPayload);
+        }
+      });
+      observer.observe(htmlRoot, { attributes: true, attributeFilter: ["data-theme"] });
+    }
+
+    fetchKpis();
+  })();
+</script>
+{% endblock %}

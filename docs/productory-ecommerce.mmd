@@ -1,0 +1,19 @@
+flowchart LR
+  host[Your Django Project] --> gateway[productory_ecommerce.urls]
+
+  gateway --> routeCatalog["/catalog/"]
+  gateway --> routeCheckout["/checkout/"]
+  gateway --> routePromotions["/promotions/"]
+  gateway --> routeInternal["/internal/"]
+
+  routeCatalog --> catalog[productory_catalog]
+  routeCheckout --> checkout[productory_checkout]
+  routePromotions --> promotions[productory_promotions]
+  routeInternal --> core[productory_core]
+
+  core --> catalog
+  core --> checkout
+  core --> promotions
+  catalog --> checkout
+  promotions --> checkout
+  checkout -. resolve_cart_pricing .-> promotions

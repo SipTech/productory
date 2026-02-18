@@ -1,0 +1,20 @@
+{% load i18n %}
+<button class="theme-toggle" type="button">
+  <span class="visually-hidden theme-label-when-auto">{% translate 'Toggle theme (current theme: auto)' %}</span>
+  <span class="visually-hidden theme-label-when-light">{% translate 'Toggle theme (current theme: light)' %}</span>
+  <span class="visually-hidden theme-label-when-dark">{% translate 'Toggle theme (current theme: dark)' %}</span>
+
+  <svg aria-hidden="true" class="theme-icon-when-auto" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+    <path d="M12 4.5V7M12 17V19.5M4.5 12H7M17 12h2.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+  </svg>
+
+  <svg aria-hidden="true" class="theme-icon-when-dark" viewBox="0 0 24 24">
+    <path d="M15.6 4.4a8.4 8.4 0 1 0 4 14.9A8 8 0 0 1 15.6 4.4Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.9"></path>
+  </svg>
+
+  <svg aria-hidden="true" class="theme-icon-when-light" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.9"></circle>
+    <path d="M12 2.8v3.1M12 18.1v3.1M2.8 12h3.1M18.1 12h3.1M5.3 5.3l2.2 2.2M16.5 16.5l2.2 2.2M18.7 5.3l-2.2 2.2M7.5 16.5l-2.2 2.2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.9"></path>
+  </svg>
+</button>

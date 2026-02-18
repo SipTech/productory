@@ -1,0 +1,354 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  html, body {
+    min-height: 100%;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 16% 14%, rgba(240, 90, 34, 0.16), rgba(240, 90, 34, 0) 34%),
+      radial-gradient(circle at 84% 22%, rgba(19, 167, 163, 0.2), rgba(19, 167, 163, 0) 40%),
+      linear-gradient(145deg, #071427 0%, #0a2442 48%, #12365a 100%);
+  }
+
+  #nav-sidebar,
+  #toggle-nav-sidebar,
+  .breadcrumbs,
+  #user-tools {
+    display: none !important;
+  }
+
+  #main,
+  #content,
+  #content-main {
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    float: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  #container {
+    width: 100% !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  #header,
+  #content {
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  #header {
+    display: none !important;
+  }
+
+  #branding {
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  #site-name {
+    margin: 0 !important;
+  }
+
+  .productory-login-hero {
+    text-align: center;
+    position: relative;
+  }
+
+  .productory-login-logo {
+    width: min(62vw, 236px);
+    margin-top: 0.12rem;
+    height: auto;
+  }
+
+  .productory-login-logo-dark {
+    display: none;
+  }
+
+  html[data-theme="dark"] .productory-login-logo-dark {
+    display: inline-block;
+  }
+
+  html[data-theme="dark"] .productory-login-logo-light {
+    display: none;
+  }
+
+  .productory-login-title {
+    margin: 0.66rem 0 0;
+    font-size: 1.24rem;
+    color: #f3f9ff;
+    letter-spacing: 0.2px;
+  }
+
+  .productory-login-subtitle {
+    margin: 0.22rem 0 0;
+    color: rgba(220, 233, 247, 0.9);
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  #content {
+    padding: 0 !important;
+  }
+
+  .productory-login-card {
+    width: min(92vw, 490px);
+    margin: 9vh auto 0;
+    padding: 1.2rem 1.5rem 1.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: linear-gradient(165deg, rgba(10, 26, 46, 0.9), rgba(7, 21, 38, 0.84));
+    box-shadow:
+      0 24px 56px rgba(0, 0, 0, 0.44),
+      0 0 0 1px rgba(17, 139, 178, 0.16),
+      0 0 28px rgba(19, 167, 163, 0.16),
+      0 0 22px rgba(240, 90, 34, 0.12);
+    backdrop-filter: blur(4px);
+  }
+
+  html[data-theme="dark"] .productory-login-card {
+    border-color: rgba(141, 220, 248, 0.36);
+    box-shadow:
+      0 24px 56px rgba(0, 0, 0, 0.44),
+      0 0 0 1px rgba(95, 209, 255, 0.28),
+      0 0 30px rgba(19, 167, 163, 0.22),
+      0 0 24px rgba(240, 90, 34, 0.15);
+  }
+
+  #login-form {
+    margin-top: 0.42rem;
+  }
+
+  #login-form .form-row {
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 0 0.7rem !important;
+    position: relative;
+  }
+
+  #login-form label {
+    display: block !important;
+    color: rgba(227, 237, 249, 0.92);
+    font-weight: 600;
+    margin: 0 0 0.28rem !important;
+  }
+
+  #login-form #id_username,
+  #login-form #id_password {
+    padding-left: 2.3rem !important;
+  }
+
+  #login-form .form-row::before {
+    content: "";
+    position: absolute;
+    left: 0.75rem;
+    top: 2.05rem;
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.78;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+  }
+
+  #login-form .form-row:nth-of-type(1)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b7d6e8' stroke-width='1.9'%3E%3Ccircle cx='12' cy='8' r='4.1'/%3E%3Cpath d='M4.5 19.5a7.5 7.5 0 0 1 15 0'/%3E%3C/svg%3E");
+  }
+
+  #login-form .form-row:nth-of-type(2)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b7d6e8' stroke-width='1.9'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E");
+  }
+
+  #login-form input[type="text"],
+  #login-form input[type="password"] {
+    width: 100% !important;
+    box-sizing: border-box;
+    border: 1px solid rgba(95, 209, 255, 0.3) !important;
+    border-radius: 10px !important;
+    background: rgba(7, 22, 39, 0.72) !important;
+    color: #f5fbff !important;
+    padding: 0.64rem 0.74rem !important;
+    font-size: 0.96rem;
+  }
+
+  #login-form input[type="text"]:focus,
+  #login-form input[type="password"]:focus {
+    outline: none;
+    border-color: rgba(240, 90, 34, 0.72) !important;
+    box-shadow: 0 0 0 3px rgba(240, 90, 34, 0.2);
+  }
+
+  #login-form .submit-row {
+    background: transparent !important;
+    border: 0 !important;
+    margin: 0.52rem 0 0.36rem !important;
+    padding: 0 !important;
+  }
+
+  #login-form .submit-row input {
+    width: 100% !important;
+    border: 0 !important;
+    border-radius: 11px !important;
+    padding: 0.72rem 0.85rem !important;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: linear-gradient(135deg, #f05a22, #dc7a1d 48%, #13a7a3) !important;
+    box-shadow: 0 10px 24px rgba(11, 36, 58, 0.46);
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  #login-form .submit-row input:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+
+  #login-form .submit-row input:disabled {
+    cursor: not-allowed;
+    opacity: 0.84;
+    transform: none;
+    filter: saturate(0.78);
+    box-shadow: 0 6px 14px rgba(11, 36, 58, 0.34);
+  }
+
+  .errornote {
+    border-radius: 10px !important;
+    margin-bottom: 0.8rem !important;
+    background: rgba(255, 68, 68, 0.12) !important;
+    border-color: rgba(255, 122, 122, 0.58) !important;
+    color: #ffd8d8 !important;
+  }
+
+  .password-reset-link {
+    margin: 0.36rem 0 0;
+    text-align: center;
+    font-size: 0.87rem;
+  }
+
+  .password-reset-link a {
+    color: #8ddcf8 !important;
+  }
+
+  .password-reset-link a:hover {
+    color: #a7ecff !important;
+  }
+
+  .productory-login-footer {
+    margin: 0.8rem 0 0.08rem;
+    text-align: center;
+    font-size: 0.81rem;
+    color: rgba(197, 219, 235, 0.88);
+  }
+
+  .productory-login-footer a {
+    color: #8ddcf8 !important;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .productory-login-footer a:hover {
+    color: #a7ecff !important;
+    text-decoration: underline;
+  }
+
+  @media (max-width: 620px) {
+    .productory-login-card {
+      width: min(94vw, 490px);
+      margin-top: 5vh;
+      padding-left: 1.1rem;
+      padding-right: 1.1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block branding %}{% endblock %}
+
+{% block content_title %}
+{% endblock %}
+
+{% block content %}
+{% now "Y" as current_year %}
+<section class="productory-login-card">
+<section class="productory-login-hero">
+  <img
+    src="{% static 'branding/productory-logo-primary-light.png' %}"
+    alt="Productory"
+    class="productory-login-logo productory-login-logo-light"
+  >
+  <img
+    src="{% static 'branding/productory-logo-primary-dark.png' %}"
+    alt="Productory"
+    class="productory-login-logo productory-login-logo-dark"
+  >
+  <h1 class="productory-login-title">Sign in to Productory Admin</h1>
+  <p class="productory-login-subtitle">Commerce Command Center</p>
+</section>
+{% if form.errors and not form.non_field_errors %}
+<p class="errornote">
+  {% blocktranslate count counter=form.errors.items|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}
+</p>
+{% endif %}
+
+{% if form.non_field_errors %}
+{% for error in form.non_field_errors %}
+<p class="errornote">{{ error }}</p>
+{% endfor %}
+{% endif %}
+
+<form action="{{ app_path }}" method="post" id="login-form">
+  {% csrf_token %}
+  <div class="form-row">
+    {{ form.username.errors }}
+    {{ form.username.label_tag }}
+    {{ form.username }}
+  </div>
+  <div class="form-row">
+    {{ form.password.errors }}
+    {{ form.password.label_tag }}
+    {{ form.password }}
+    <input type="hidden" name="next" value="{{ next }}">
+  </div>
+  {% url 'admin_password_reset' as password_reset_url %}
+  <div class="submit-row">
+    <input type="submit" value="{% translate 'Log in' %}">
+  </div>
+  {% if password_reset_url %}
+  <div class="password-reset-link">
+    <a href="{{ password_reset_url }}">{% translate 'Forgotten your password or username?' %}</a>
+  </div>
+  {% endif %}
+</form>
+<p class="productory-login-footer">
+  Made with 🖤 by <a href="https://github.com/SipTech/" target="_blank" rel="noopener noreferrer">SipTech</a> @ 2024 - {{ current_year }}
+</p>
+</section>
+<script>
+  (function () {
+    const form = document.getElementById("login-form");
+    if (!form) return;
+    form.addEventListener("submit", function () {
+      const submit = form.querySelector("input[type='submit']");
+      if (!submit || submit.disabled) return;
+      submit.disabled = true;
+      submit.value = "Logging in...";
+    });
+  })();
+</script>
+{% endblock %}

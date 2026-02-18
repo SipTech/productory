@@ -1,60 +1,35 @@
-version: '3'
 services:
-  productory-store:
-    image: mysql:8.0
-    container_name: productory-store
-    restart: always
+  productory-db:
+    image: postgres:16-alpine
+    container_name: productory-db
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-productory}
+      POSTGRES_USER: ${POSTGRES_USER:-productory}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-productory}
     ports:
-      - "${DB_PORT}:${DB_PORT}"
-    networks:
-      product-net:
-        #ipv4_address: 172.20.0.2
-  productory-cache:
-    image: redis:latest
-    container_name: productory-cache
-    restart: always
-    networks:
-      - product-net
-  productory-api:
-    build: .
-    container_name: productory-api
-    restart: always
-    depends_on:
-      - productory-store
-    environment:
-      DEBUG: ${DEBUG}
-      APP_NAME: ${APP_NAME}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
-      SECRET_KEY: ${SECRET_KEY}
-      DB_PATH: ${DB_PATH}
-      DB_ENGINE: ${DB_ENGINE}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      CDN: ${CDN}
-      EMAIL_HOST: ${EMAIL_HOST}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
-      EMAIL_PORT: ${EMAIL_PORT}
-      SERVER_PORT: ${SERVER_PORT}
-      JWT_ALGORITHM: ${JWT_ALGORITHM}
-      ADMIN_USER: ${ADMIN_USER}
-      ADMIN_USER_EMAIL: ${ADMIN_USER_EMAIL}
-    ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
-    networks:
-      - product-net
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ${POSTGRES_DATA_PATH:-./.data/postgres}:/var/lib/postgresql/data
 
-networks:
-  product-net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
+  productory-demo:
+    build: .
+    container_name: productory-demo
+    restart: unless-stopped
+    depends_on:
+      - productory-db
+    environment:
+      DEMO_DB_ENGINE: ${DEMO_DB_ENGINE:-django.db.backends.postgresql}
+      DEMO_DB_NAME: ${DEMO_DB_NAME:-productory}
+      DEMO_DB_USER: ${DEMO_DB_USER:-productory}
+      DEMO_DB_PASSWORD: ${DEMO_DB_PASSWORD:-productory}
+      DEMO_DB_HOST: ${DEMO_DB_HOST:-productory-db}
+      DEMO_DB_PORT: ${DEMO_DB_PORT:-5432}
+      DEMO_ALLOWED_HOSTS: ${DEMO_ALLOWED_HOSTS:-*}
+      DEMO_ENABLE_JWT: ${DEMO_ENABLE_JWT:-false}
+      DEMO_SECRET_KEY: ${DEMO_SECRET_KEY:-productory-oss-demo-key}
+      DEMO_DEBUG: ${DEMO_DEBUG:-true}
+    ports:
+      - "${DEMO_PORT:-8000}:8000"
+    volumes:
+      - .:/app

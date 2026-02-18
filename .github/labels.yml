@@ -1,0 +1,9 @@
+- name: good first issue
+  color: "7057ff"
+  description: Good starter task for new contributors.
+- name: discussion
+  color: "d4c5f9"
+  description: Community discussion topic.
+- name: bug
+  color: "d73a4a"
+  description: Something is not working.

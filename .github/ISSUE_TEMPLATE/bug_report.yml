@@ -1,0 +1,19 @@
+name: Bug report
+description: Report a reproducible bug in Productory
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include exact commands, payloads, and versions.
+    validations:
+      required: true

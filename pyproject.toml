@@ -1,0 +1,104 @@
+[build-system]
+requires = ["hatchling>=1.24.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "productory-ecommerce"
+version = "0.2.0"
+description = "Reusable Django ecommerce building blocks: catalog, cart, checkout, and orders."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Productory Contributors" }
+]
+keywords = ["django", "ecommerce", "drf", "cart", "checkout"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Framework :: Django",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "Django>=4.2,<6.0",
+  "djangorestframework>=3.14",
+  "django-filter>=24.0",
+  "psycopg[binary]>=3.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-django>=4.8",
+  "factory-boy>=3.3",
+  "ruff>=0.9",
+  "coverage[toml]>=7.6",
+  "djangorestframework-simplejwt>=5.4",
+  "mypy>=1.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/productory/productory-ecommerce"
+Repository = "https://github.com/productory/productory-ecommerce"
+Issues = "https://github.com/productory/productory-ecommerce/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "src/productory_core",
+  "src/productory_catalog",
+  "src/productory_checkout",
+  "src/productory_promotions",
+  "src/productory_ecommerce",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = ["src", "demo"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/migrations/*.py" = ["E501", "I001"]
+
+[tool.coverage.run]
+source = [
+  "productory_core",
+  "productory_catalog",
+  "productory_checkout",
+  "productory_promotions",
+]
+branch = true
+omit = [
+  "*/admin.py",
+  "*/migrations/*",
+]
+
+[tool.coverage.report]
+fail_under = 80
+skip_covered = true
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+check_untyped_defs = true
+exclude = "(^|/)migrations/"
+packages = [
+  "productory_core",
+  "productory_catalog",
+  "productory_checkout",
+  "productory_promotions",
+]
