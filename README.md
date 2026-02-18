@@ -2,6 +2,12 @@
 
 # Productory E-commerce
 
+[![CI](https://github.com/SipTech/productory/actions/workflows/ci.yml/badge.svg)](https://github.com/SipTech/productory/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/productory-ecommerce.svg)](https://pypi.org/project/productory-ecommerce/)
+[![Python](https://img.shields.io/pypi/pyversions/productory-ecommerce.svg)](https://pypi.org/project/productory-ecommerce/)
+[![Django](https://img.shields.io/badge/Django-4.2%20%7C%205.x-0C4B33)](https://www.djangoproject.com/)
+[![License](https://img.shields.io/pypi/l/productory-ecommerce.svg)](LICENSE)
+
 Reusable Django e-commerce building blocks with a working demo: catalog, checkout/orders, promotions, and store pricing config.
 
 ![Dark Mode Dashboard](docs/assets/branding/productory_dashboard_dark.png)
@@ -70,6 +76,12 @@ Mounted under `path("api/", include("productory_ecommerce.urls"))`:
 
 ```bash
 pip install productory-ecommerce
+```
+
+Optional Postgres driver:
+
+```bash
+pip install "productory-ecommerce[postgres]"
 ```
 
 ```python

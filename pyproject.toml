@@ -29,10 +29,12 @@ dependencies = [
   "Django>=4.2,<6.0",
   "djangorestframework>=3.14",
   "django-filter>=24.0",
-  "psycopg[binary]>=3.2",
 ]
 
 [project.optional-dependencies]
+postgres = [
+  "psycopg[binary]>=3.2",
+]
 dev = [
   "pytest>=8.0",
   "pytest-django>=4.8",
@@ -41,12 +43,13 @@ dev = [
   "coverage[toml]>=7.6",
   "djangorestframework-simplejwt>=5.4",
   "mypy>=1.11",
+  "psycopg[binary]>=3.2",
 ]
 
 [project.urls]
-Homepage = "https://github.com/productory/productory-ecommerce"
-Repository = "https://github.com/productory/productory-ecommerce"
-Issues = "https://github.com/productory/productory-ecommerce/issues"
+Homepage = "https://github.com/SipTech/productory"
+Repository = "https://github.com/SipTech/productory"
+Issues = "https://github.com/SipTech/productory/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = [
