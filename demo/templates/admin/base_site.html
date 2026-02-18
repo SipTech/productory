@@ -104,18 +104,26 @@
 
   .productory-logo-wrap {
     position: relative;
-    width: 160px;
-    height: 54px;
+    width: 62px;
+    height: 62px;
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    background: rgba(255, 255, 255, 0.55);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.74),
+      rgba(225, 246, 252, 0.88)
+    );
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   }
 
   html[data-theme="dark"] .productory-logo-wrap {
-    border-color: rgba(255, 255, 255, 0.16);
-    background: rgba(11, 22, 38, 0.62);
+    border-color: rgba(255, 255, 255, 0.18);
+    background: linear-gradient(
+      145deg,
+      rgba(12, 26, 45, 0.88),
+      rgba(20, 67, 99, 0.88)
+    );
   }
 
   .productory-logo {
@@ -123,8 +131,9 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
+    padding: 5px;
   }
 
   .productory-logo-dark {
@@ -146,7 +155,7 @@
   }
 
   .productory-brand-title {
-    font-size: 1.02rem;
+    font-size: 1.04rem;
     font-weight: 700;
     letter-spacing: 0.24px;
     text-transform: uppercase;
@@ -157,6 +166,104 @@
     letter-spacing: 0.18px;
     opacity: 0.86;
     text-transform: uppercase;
+  }
+
+  #user-tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .theme-toggle {
+    position: relative;
+    width: 2.35rem;
+    height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(17, 139, 178, 0.35);
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.8), rgba(204, 240, 245, 0.92));
+    color: var(--secondary, #0e3f63);
+    box-shadow: 0 6px 14px rgba(14, 63, 99, 0.2);
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    transform: translateY(-1px);
+    border-color: rgba(240, 90, 34, 0.55);
+    box-shadow: 0 9px 18px rgba(14, 63, 99, 0.24);
+  }
+
+  .theme-toggle:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(14, 63, 99, 0.22);
+  }
+
+  .theme-toggle:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px rgba(240, 90, 34, 0.28),
+      0 0 0 4px rgba(240, 90, 34, 0.16);
+  }
+
+  .theme-toggle svg {
+    width: 1.12rem;
+    height: 1.12rem;
+    fill: currentColor;
+    opacity: 0.98;
+  }
+
+  .theme-toggle .theme-icon-when-auto,
+  .theme-toggle .theme-icon-when-dark,
+  .theme-toggle .theme-icon-when-light {
+    display: none !important;
+  }
+
+  html[data-theme="light"] .theme-toggle .theme-icon-when-dark {
+    display: inline-block !important;
+  }
+
+  html[data-theme="dark"] .theme-toggle .theme-icon-when-light {
+    display: inline-block !important;
+  }
+
+  html[data-theme="auto"] .theme-toggle .theme-icon-when-dark {
+    display: inline-block !important;
+  }
+
+  html[data-theme="dark"] .theme-toggle {
+    border-color: rgba(95, 209, 255, 0.34);
+    background: linear-gradient(145deg, rgba(20, 34, 55, 0.9), rgba(22, 83, 118, 0.92));
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.36);
+  }
+
+  html[data-theme="dark"] .theme-toggle:hover {
+    border-color: rgba(240, 90, 34, 0.62);
+    box-shadow: 0 9px 22px rgba(0, 0, 0, 0.42);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="auto"] .theme-toggle .theme-icon-when-dark {
+      display: none !important;
+    }
+
+    html[data-theme="auto"] .theme-toggle .theme-icon-when-light {
+      display: inline-block !important;
+    }
+
+    html[data-theme="auto"] .theme-toggle {
+      border-color: rgba(95, 209, 255, 0.34);
+      background: linear-gradient(145deg, rgba(20, 34, 55, 0.9), rgba(22, 83, 118, 0.92));
+      color: #ffffff;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.36);
+    }
   }
 
   @media (prefers-color-scheme: dark) {
@@ -176,15 +283,26 @@
 
   @media (max-width: 860px) {
     .productory-logo-wrap {
-      width: 128px;
-      height: 44px;
+      width: 52px;
+      height: 52px;
     }
 
     .productory-brand-subtitle {
       display: none;
     }
+
+    .theme-toggle {
+      width: 2.1rem;
+      height: 2.1rem;
+    }
   }
 </style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="icon" href="{% static 'branding/favicon.ico' %}" sizes="any">
+<link rel="icon" type="image/png" href="{% static 'branding/favicon.png' %}">
 {% endblock %}
 
 {% block branding %}
@@ -192,12 +310,12 @@
   <a href="{% url 'admin:index' %}" class="productory-brand-link">
     <span class="productory-logo-wrap" aria-hidden="true">
       <img
-        src="{% static 'branding/productory-logo-primary-light.png' %}"
+        src="{% static 'branding/productory-mark-light.png' %}"
         alt=""
         class="productory-logo productory-logo-light"
       >
       <img
-        src="{% static 'branding/productory-logo-primary-dark.png' %}"
+        src="{% static 'branding/productory-mark-dark.png' %}"
         alt=""
         class="productory-logo productory-logo-dark"
       >
