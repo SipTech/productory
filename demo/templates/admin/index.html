@@ -11,6 +11,20 @@
     border: 1px solid var(--hairline-color, #d9d9d9);
     border-radius: 10px;
     box-shadow: 0 8px 26px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .productory-dashboard::before {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 220px;
+    height: 220px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(240, 90, 34, 0.24), rgba(240, 90, 34, 0));
+    pointer-events: none;
   }
 
   .productory-dashboard h2 {
@@ -19,6 +33,7 @@
     color: var(--body-fg, #111);
     font-size: 1.35rem;
     letter-spacing: 0.2px;
+    position: relative;
   }
 
   .productory-controls {
@@ -57,6 +72,7 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 0.8rem;
     margin-bottom: 1.1rem;
+    position: relative;
   }
 
   .productory-card {
@@ -101,6 +117,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1rem;
+    position: relative;
   }
 
   .productory-chart-box {
@@ -108,6 +125,9 @@
     border-radius: 8px;
     padding: 0.8rem;
     background: var(--body-bg, #fff);
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
   }
 
   .productory-chart-box h3 {
@@ -115,6 +135,17 @@
     margin-bottom: 0.65rem;
     font-size: 0.98rem;
     color: var(--body-fg, #111);
+  }
+
+  .productory-chart-canvas {
+    position: relative;
+    min-height: 240px;
+    height: 240px;
+  }
+
+  .productory-chart-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
   }
 
   .productory-error {
@@ -182,11 +213,15 @@
     <div class="productory-charts">
       <div class="productory-chart-box">
         <h3>Orders by Status</h3>
-        <canvas id="orders-chart" height="190"></canvas>
+        <div class="productory-chart-canvas">
+          <canvas id="orders-chart"></canvas>
+        </div>
       </div>
       <div class="productory-chart-box">
         <h3>Cart Funnel</h3>
-        <canvas id="carts-chart" height="190"></canvas>
+        <div class="productory-chart-canvas">
+          <canvas id="carts-chart"></canvas>
+        </div>
       </div>
     </div>
     <div class="productory-error" id="kpi-error" style="display:none;"></div>
@@ -223,13 +258,13 @@
       bodyColor: cssVar("--body-fg", "#111827"),
       quietColor: cssVar("--body-quiet-color", "#6b7280"),
       gridColor: cssVar("--hairline-color", "#d1d5db"),
-      primary: cssVar("--primary", "#2563eb"),
-      secondary: cssVar("--secondary", "#0f766e"),
-      accent: cssVar("--accent", "#f97316"),
-      info: "#0891b2",
-      success: "#16a34a",
+      primary: cssVar("--primary", "#118bb2"),
+      secondary: cssVar("--secondary", "#0e3f63"),
+      accent: cssVar("--accent", "#f05a22"),
+      info: "#22d3ee",
+      success: "#14b8a6",
       warning: "#f59e0b",
-      danger: "#dc2626"
+      danger: "#ef4444"
     });
 
     const money = (currency, value) => `${currency} ${Number(value).toFixed(2)}`;

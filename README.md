@@ -52,7 +52,7 @@ Default store configuration is database-backed:
 - VAT: `15%` with prices treated as VAT-inclusive by default
 
 Open `http://127.0.0.1:8010/api/` (default from `.env.example`).
-Open `http://127.0.0.1:8010/admin/` for the Django admin dashboard landing page with KPI cards and charts.
+Open `http://127.0.0.1:8010/admin/` for the branded Django admin dashboard landing page with KPI cards, charts, and dark/light mode-aware theming.
 
 ```bash
 make demo-logs
