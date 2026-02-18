@@ -1,0 +1,13 @@
+title: "Idea"
+labels: ["discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: "Share an idea for Productory improvements."
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe problem, proposal, and tradeoffs.
+    validations:
+      required: true

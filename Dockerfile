@@ -1,46 +1,21 @@
-# Base image
-FROM python:3.9
+FROM python:3.11-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV APP_HOME=/app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Create app directory
-RUN mkdir $APP_HOME
-WORKDIR $APP_HOME
+WORKDIR /app
 
-# Install dependencies
 RUN apt-get update && \
-    apt-get install -y default-libmysqlclient-dev && \
-    apt-get install -y default-mysql-client && \
-    apt-get install -y netcat && \
-    apt-get clean && \
+    apt-get install -y --no-install-recommends build-essential libpq-dev && \
     rm -rf /var/lib/apt/lists/*
-COPY requirements.txt $APP_HOME/
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
 
-# Copy app files
-COPY productory $APP_HOME/productory/
-COPY product $APP_HOME/product/
-COPY manage.py $APP_HOME/
+COPY pyproject.toml README.md /app/
+COPY src /app/src
+COPY demo /app/demo
+COPY tests /app/tests
 
-# Add script to create database user
-COPY create_db_user.sh $APP_HOME/
-RUN chmod +x $APP_HOME/create_db_user.sh && \
-    $APP_HOME/create_db_user.sh
+RUN pip install --upgrade pip && pip install -e .
 
-# Make migrations and migrate the database
-COPY fixtures.json $APP_HOME/
-RUN python manage.py makemigrations && \
-    python manage.py migrate && \
-    python manage.py collectstatic
-    #&& \
-    #python manage.py loaddata fixtures.json
-
-# Expose port
 EXPOSE 8000
 
-# Run the command to start the app
-CMD ["gunicorn", "productory.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["python", "demo/manage.py", "runserver", "0.0.0.0:8000"]

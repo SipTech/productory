@@ -1,124 +1,125 @@
-#Productory
+![Productory E-commerce](docs/assets/branding/productory-logo-primary-light.png)
 
-Productory is a web application built with Django and Django Rest Framework (DRF) that allows users to browse and purchase products, combos, promotions, and menus.
+# Productory E-commerce
 
+Productory is a complete rewrite as reusable Django apps for catalog, checkout, orders, and promotions.
 
-##Features
+## What this repo is
 
+- Package-first Django OSS project
+- Source code in `src/`
+- Demo project in `demo/`
+- Tests in `tests/`
+- Single code path: package modules + demo project only
 
-Browse products by category
+## High-level repo layout
 
-Add products to the cart
-
-Create combos by selecting multiple products
-
-Create promotions by selecting multiple combos and/or products
-
-Create menus by selecting multiple combos, products, promotions, and categories
-
-Manage products, combos, promotions, and menus via the admin interface
-
-Authentication and authorization using JSON Web Tokens (JWT)
-
-
-###Installation and Setup
-
-####Prerequisites
-
-
-Python 3.7 or higher
-
-Django 3.2 or higher
-
-Django Rest Framework (DRF) 3.12 or higher
-
-MySQL 8.0 or higher
-
-Node.js 14 or higher (for running frontend development server)
-
-
-####Installation
-
-
-Clone the repository:
-``` bash
-git clone https://github.com/username/Productory.git
-cd Productory
+```text
+.
+├── src/                 # installable Productory Django apps
+├── demo/                # demo Django project
+├── tests/               # pytest suite for package apps
+├── docs/                # guides, API examples, branding
+├── .devcontainer/       # dev container config
+├── docker-compose.yaml  # local docker stack (demo + postgres)
+├── Dockerfile           # demo app image
+├── Makefile             # primary developer/ops command interface
+└── pyproject.toml       # package metadata + tooling config
 ```
 
+## Quickstart
 
-Install Python dependencies:
-``` bash
-pip install -r requirements.txt
+```bash
+make install-dev
+make demo-migrate
+make demo-run
 ```
 
-Create a PostgreSQL database and update the database settings in Productory/settings.py:
-``` python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'productory_db',
-        'USER': 'your_db_username',
-        'PASSWORD': 'your_db_password',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
+Open `http://127.0.0.1:8000/api/`.
+
+## Dev Container
+
+If you use VS Code Dev Containers, open the repo in container and it will run `make install-dev` automatically.
+
+Then run:
+
+```bash
+make demo-migrate
+make demo-run
 ```
 
-Run database migrations:
-``` bash
-python manage.py migrate
+## Docker workflow
+
+```bash
+make up
+make migrations
+make loaddata
 ```
 
-Load sample data:
-``` bash
-python manage.py loaddata fixtures/initial_data.json
+Use `ENV_FILE=.env` to override defaults, for example: `make ENV_FILE=.env up`.
+
+Useful commands:
+
+```bash
+make logs
+make test
+make test-all
+make drop-create-db
+make down
 ```
 
-Install frontend dependencies:
-``` bash
-cd frontend
-npm install
+## Install in your Django project
+
+```bash
+pip install productory-ecommerce
 ```
 
-Build frontend assets:
-``` bash
-npm run build
-Run the development server:
-python manage.py runserver
+```python
+INSTALLED_APPS = [
+    "rest_framework",
+    "django_filters",
+    "productory_core",
+    "productory_catalog",
+    "productory_checkout",
+    "productory_promotions",
+]
+
+urlpatterns = [
+    path("api/", include("productory_ecommerce.urls")),
+]
 ```
 
-Visit http://localhost:8000 to view the application.
+## Architecture
 
-
-To get the IP Address of the database container, run:
-``` bash
-docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}’ productory-sore
+```mermaid
+flowchart LR
+  A[productory_catalog] --> B[productory_checkout]
+  C[productory_promotions] --> B
+  D[productory_core] --> A
+  D --> B
+  D --> C
+  E[Your Django Project] --> F[productory_ecommerce.urls]
+  F --> A
+  F --> B
+  F --> C
 ```
 
-#####Usage (wishlist):
+## Docs
 
+- `docs/quickstart.md`
+- `docs/concepts.md`
+- `docs/api-examples.md`
+- `docs/extension-points.md`
+- `docs/branding.md`
 
-*Browse products by category on the homepage
+## Contributing
 
-*Click on a product to view its details
+See `CONTRIBUTING.md`.
 
-*Click the "Add to cart" button to add the product to the cart
+## Codeowner
 
-*Click on the cart icon to view the cart and update the quantity of each product
+[**SipTech**](https://github.com/SipTech/)
 
-*Click on the "Checkout" button to proceed to the checkout page
+## License
 
-*Enter your shipping and billing information and click "Place order" to complete the purchase
-
-
-####Contributing
-
-If you'd like to contribute to Productory, please fork the repository and make changes as you'd like. Pull requests are welcome.
-
-
-####License
-
-The code in this project is licensed under the MIT License.
-
+Apache-2.0.

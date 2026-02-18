@@ -5,6 +5,10 @@ __pycache__/
 
 # Local development env files
 .env
+.env.*
+!.env.example
+
+# Databases
 *.sqlite3
 
 # Logs and other files
@@ -23,10 +27,23 @@ env3/
 .venv3/
 .venv37/
 venv37/
+*.egg-info/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local planning notes
+.plans/
+
+# IDE files
 .idea/
 .vscode/
 .vs/
 npm-debug.log*
+.DS_Store
 
 # Django collected static files
 /staticfiles/
