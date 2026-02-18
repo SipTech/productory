@@ -7,28 +7,36 @@ API_SERVICE ?= productory-demo
 DB_SERVICE ?= productory-db
 SERVICE ?= $(API_SERVICE)
 TEST ?=
+VENV ?= .venv
+VENV_PY := $(VENV)/bin/python3
 
 DC := $(COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install-dev qa coverage demo-migrate demo-run demo-stop demo-logs demo-check up down restart logs ps migrations superuser drop-create-db loaddata show-urls test test-quick test-one test-all shell ipython
+.PHONY: help venv install-dev qa coverage demo-migrate demo-run demo-stop demo-logs demo-check up down restart logs ps migrations superuser drop-create-db loaddata show-urls test test-quick test-one test-all shell ipython
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*##' Makefile | sort | awk 'BEGIN {FS = ":.*## "}; {printf "%-18s %s\n", $$1, $$2}'
 
-install-dev: ## Install package + dev dependencies locally
-	python3 -m pip install -e '.[dev]'
+venv: ## Create local virtualenv at .venv (if missing)
+	@if [ ! -x "$(VENV_PY)" ]; then \
+		python3 -m venv $(VENV); \
+		$(VENV_PY) -m pip install --upgrade pip; \
+	fi
 
-qa: ## Run lint, format check, type check, and tests
-	python3 -m ruff check src tests demo
-	python3 -m ruff format --check src tests demo --exclude '*/migrations/*'
-	python3 -m mypy src
-	python3 -m pytest tests
+install-dev: venv ## Install package + dev dependencies into local .venv
+	$(VENV_PY) -m pip install -e '.[dev]'
 
-coverage: ## Run tests with coverage report
-	python3 -m coverage run -m pytest tests
-	python3 -m coverage report
+qa: venv ## Run lint, format check, type check, and tests
+	$(VENV_PY) -m ruff check src tests demo
+	$(VENV_PY) -m ruff format --check src tests demo --exclude '*/migrations/*'
+	$(VENV_PY) -m mypy src
+	$(VENV_PY) -m pytest tests
+
+coverage: venv ## Run tests with coverage report
+	$(VENV_PY) -m coverage run -m pytest tests
+	$(VENV_PY) -m coverage report
 
 demo-migrate: ## Run migrations for the demo project
 	$(DC) up -d $(DB_SERVICE) $(API_SERVICE)
@@ -47,8 +55,8 @@ demo-stop: ## Stop detached demo docker stack
 demo-logs: ## Tail demo container logs
 	$(DC) logs -f --tail=200 $(API_SERVICE)
 
-demo-check: ## Run Django checks for demo project
-	python3 demo/manage.py check
+demo-check: venv ## Run Django checks for demo project
+	$(VENV_PY) demo/manage.py check
 
 up: ## Start and build docker services
 	$(DC) up -d --build

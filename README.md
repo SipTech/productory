@@ -28,6 +28,8 @@ make install-dev
 make demo-run
 ```
 
+`make install-dev` bootstraps a local `.venv` and installs dev dependencies into it.
+
 Then:
 
 - Catalog products API: `http://127.0.0.1:8010/api/catalog/products/`

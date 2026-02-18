@@ -7,6 +7,8 @@ make install-dev
 make demo-migrate
 ```
 
+`make install-dev` creates `.venv` automatically and installs project dev dependencies into it.
+
 If you want local overrides:
 
 ```bash
