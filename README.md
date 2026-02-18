@@ -30,7 +30,9 @@ make demo-run
 
 Then:
 
-- API root: `http://127.0.0.1:8010/api/`
+- Catalog products API: `http://127.0.0.1:8010/api/catalog/products/`
+- Checkout carts API: `http://127.0.0.1:8010/api/checkout/carts/`
+- Promotions API: `http://127.0.0.1:8010/api/promotions/promotions/`
 - Create admin: `make superuser`
 - Admin dashboard: `http://127.0.0.1:8010/admin/`
 

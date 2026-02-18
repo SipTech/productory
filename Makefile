@@ -32,10 +32,12 @@ coverage: ## Run tests with coverage report
 
 demo-migrate: ## Run migrations for the demo project
 	$(DC) up -d $(DB_SERVICE) $(API_SERVICE)
+	$(DC) exec -T $(DB_SERVICE) sh -lc 'until pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" >/dev/null 2>&1; do echo "Waiting for Postgres..."; sleep 1; done'
 	$(DC) exec $(API_SERVICE) python demo/manage.py migrate
 
 demo-run: ## Run demo stack in detached docker mode
 	$(DC) up -d --build $(DB_SERVICE) $(API_SERVICE)
+	$(DC) exec -T $(DB_SERVICE) sh -lc 'until pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" >/dev/null 2>&1; do echo "Waiting for Postgres..."; sleep 1; done'
 	$(DC) exec $(API_SERVICE) python demo/manage.py migrate
 	$(DC) exec $(API_SERVICE) python demo/manage.py seed_demo_data --reset
 
