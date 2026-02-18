@@ -8,6 +8,8 @@ from django.db import models
 from productory_catalog.models import Product
 from productory_core.currency import default_currency_code
 from productory_core.models import TimeStampedModel
+from productory_core.store import get_store_pricing_policy
+from productory_core.validators import validate_active_currency_code
 
 
 def generate_order_number() -> str:
@@ -51,7 +53,11 @@ class Cart(TimeStampedModel):
         related_name="productory_carts",
     )
     email = models.EmailField(blank=True)
-    currency = models.CharField(max_length=3, default=default_currency_code)
+    currency = models.CharField(
+        max_length=3,
+        default=default_currency_code,
+        validators=[validate_active_currency_code],
+    )
     price_includes_vat = models.BooleanField(default=True)
     vat_rate_percent = models.DecimalField(
         max_digits=5,
@@ -109,8 +115,22 @@ class Cart(TimeStampedModel):
         validators=[MinValueValidator(Decimal("0.00"))],
     )
 
+    class Meta:
+        indexes = [models.Index(fields=["status", "-updated_at"], name="prod_cart_status_upd_idx")]
+
     def __str__(self) -> str:
         return f"Cart #{self.pk}"
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            pricing_policy = get_store_pricing_policy()
+            if not self.currency:
+                self.currency = pricing_policy.currency_code
+            self.price_includes_vat = pricing_policy.price_includes_vat
+            self.vat_rate_percent = pricing_policy.vat_rate_percent
+
+        self.currency = self.currency.upper()
+        return super().save(*args, **kwargs)
 
 
 class CartItem(TimeStampedModel):
@@ -151,7 +171,11 @@ class Order(TimeStampedModel):
         choices=OrderStatus.choices,
         default=OrderStatus.SUBMITTED,
     )
-    currency = models.CharField(max_length=3, default=default_currency_code)
+    currency = models.CharField(
+        max_length=3,
+        default=default_currency_code,
+        validators=[validate_active_currency_code],
+    )
     price_includes_vat = models.BooleanField(default=True)
     vat_rate_percent = models.DecimalField(
         max_digits=5,
@@ -224,9 +248,14 @@ class Order(TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [models.Index(fields=["status", "-created_at"], name="prod_order_status_cre_idx")]
 
     def __str__(self) -> str:
         return f"Order #{self.number}"
+
+    def save(self, *args, **kwargs):
+        self.currency = self.currency.upper()
+        return super().save(*args, **kwargs)
 
 
 class OrderItem(TimeStampedModel):

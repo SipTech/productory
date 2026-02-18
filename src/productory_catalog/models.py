@@ -5,6 +5,7 @@ from django.db import models
 
 from productory_core.currency import default_currency_code
 from productory_core.models import TimeStampedModel
+from productory_core.validators import validate_active_currency_code
 
 
 class Category(TimeStampedModel):
@@ -43,7 +44,11 @@ class Product(TimeStampedModel):
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.00"))],
     )
-    currency = models.CharField(max_length=3, default=default_currency_code)
+    currency = models.CharField(
+        max_length=3,
+        default=default_currency_code,
+        validators=[validate_active_currency_code],
+    )
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -51,6 +56,10 @@ class Product(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.name} ({self.sku})"
+
+    def save(self, *args, **kwargs):
+        self.currency = self.currency.upper()
+        return super().save(*args, **kwargs)
 
 
 class ProductImage(TimeStampedModel):

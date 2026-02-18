@@ -7,7 +7,7 @@ from django.db import transaction
 from productory_checkout.models import Cart, CartItem, CartStatus, Order, OrderItem, OrderStatus
 from productory_core.conf import get_setting
 from productory_core.hooks import emit_webhook_event, order_created, order_status_changed
-from productory_core.store import compute_tax_breakdown, get_store_pricing_policy
+from productory_core.store import compute_tax_breakdown
 
 _ALLOWED_TRANSITIONS = {
     OrderStatus.DRAFT: {OrderStatus.SUBMITTED, OrderStatus.CANCELED},
@@ -33,7 +33,6 @@ def _resolve_promotional_total(cart: Cart, base_subtotal: Decimal) -> tuple[Deci
 
 @transaction.atomic
 def recompute_cart_totals(cart: Cart) -> Cart:
-    pricing_policy = get_store_pricing_policy()
     subtotal_base = Decimal("0.00")
     items = cart.items.select_related("product")
 
@@ -50,17 +49,14 @@ def recompute_cart_totals(cart: Cart) -> Cart:
 
     subtotal_breakdown = compute_tax_breakdown(
         subtotal_base,
-        vat_rate_percent=pricing_policy.vat_rate_percent,
-        price_includes_vat=pricing_policy.price_includes_vat,
+        vat_rate_percent=cart.vat_rate_percent,
+        price_includes_vat=cart.price_includes_vat,
     )
     total_breakdown = compute_tax_breakdown(
         total_base,
-        vat_rate_percent=pricing_policy.vat_rate_percent,
-        price_includes_vat=pricing_policy.price_includes_vat,
+        vat_rate_percent=cart.vat_rate_percent,
+        price_includes_vat=cart.price_includes_vat,
     )
-
-    cart.price_includes_vat = pricing_policy.price_includes_vat
-    cart.vat_rate_percent = pricing_policy.vat_rate_percent
     cart.subtotal_excl_vat_amount = subtotal_breakdown.amount_excl_vat
     cart.subtotal_incl_vat_amount = subtotal_breakdown.amount_incl_vat
     cart.total_excl_vat_amount = total_breakdown.amount_excl_vat

@@ -224,20 +224,25 @@ class Command(BaseCommand):
         ]
 
         for idx, (code, name, promo_type, value) in enumerate(promo_specs):
+            applies_to_all_products = idx == 0
             promo, _ = Promotion.objects.update_or_create(
                 code=code,
                 defaults={
                     "name": name,
                     "promotion_type": promo_type,
                     "value": value,
+                    "applies_to_all_products": applies_to_all_products,
                     "start_at": now,
                     "end_at": month_end,
                     "is_active": True,
                 },
             )
 
-            product_slice = products[idx * 6 : (idx * 6) + 10]
-            promo.products.set(product_slice)
+            if applies_to_all_products:
+                promo.products.clear()
+            else:
+                product_slice = products[idx * 6 : (idx * 6) + 10]
+                promo.products.set(product_slice)
             promo.bundles.set(bundles[idx % len(bundles) : (idx % len(bundles)) + 2])
 
     @staticmethod

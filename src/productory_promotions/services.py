@@ -59,6 +59,7 @@ def _bundle_discount(cart: Cart) -> tuple[Decimal, str]:
 def _promotion_discount(cart: Cart) -> tuple[Decimal, str]:
     now = timezone.now()
     cart_items = {item.product_id: item for item in cart.items.select_related("product")}
+    cart_subtotal = sum(item.quantity * item.unit_price_snapshot for item in cart_items.values())
     best_discount = Decimal("0.00")
     best_rule = ""
 
@@ -69,12 +70,15 @@ def _promotion_discount(cart: Cart) -> tuple[Decimal, str]:
     ).prefetch_related("products")
 
     for promo in promotions:
-        eligible_subtotal = Decimal("0.00")
-        for product in promo.products.all():
-            item = cart_items.get(product.id)
-            if not item:
-                continue
-            eligible_subtotal += item.quantity * item.unit_price_snapshot
+        if promo.applies_to_all_products:
+            eligible_subtotal = cart_subtotal
+        else:
+            eligible_subtotal = Decimal("0.00")
+            for product in promo.products.all():
+                item = cart_items.get(product.id)
+                if not item:
+                    continue
+                eligible_subtotal += item.quantity * item.unit_price_snapshot
 
         if eligible_subtotal <= Decimal("0.00"):
             continue

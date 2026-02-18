@@ -9,6 +9,7 @@ from django.utils import timezone
 from productory_catalog.models import Product
 from productory_core.currency import default_currency_code
 from productory_core.models import TimeStampedModel
+from productory_core.validators import validate_active_currency_code
 
 
 class Bundle(TimeStampedModel):
@@ -20,11 +21,19 @@ class Bundle(TimeStampedModel):
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.00"))],
     )
-    currency = models.CharField(max_length=3, default=default_currency_code)
+    currency = models.CharField(
+        max_length=3,
+        default=default_currency_code,
+        validators=[validate_active_currency_code],
+    )
     is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["name"]
+
+    def save(self, *args, **kwargs):
+        self.currency = self.currency.upper()
+        return super().save(*args, **kwargs)
 
 
 class BundleItem(TimeStampedModel):
@@ -52,12 +61,19 @@ class Promotion(TimeStampedModel):
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.00"))],
     )
+    applies_to_all_products = models.BooleanField(default=False)
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
     is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["name"]
+        indexes = [
+            models.Index(
+                fields=["is_active", "start_at", "end_at"],
+                name="productory_promo_window_idx",
+            )
+        ]
 
     def is_current(self) -> bool:
         now = timezone.now()

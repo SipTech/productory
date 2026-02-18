@@ -27,6 +27,7 @@ def test_seed_demo_data_creates_expected_dataset(db):
 
     promo_types = set(Promotion.objects.values_list("promotion_type", flat=True))
     assert promo_types == {PromotionType.FIXED, PromotionType.PERCENTAGE}
+    assert Promotion.objects.filter(applies_to_all_products=True).count() == 1
 
     now = timezone.now()
     last_day = calendar.monthrange(now.year, now.month)[1]

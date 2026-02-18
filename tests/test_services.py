@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from productory_checkout.models import CartStatus, OrderStatus
+from productory_checkout.models import Cart, CartStatus, OrderStatus
 from productory_checkout.services import (
     create_order_from_cart,
     transition_order_status,
@@ -65,11 +65,12 @@ def test_discount_never_exceeds_subtotal(cart, product):
     assert cart.discount_amount >= Decimal("0.00")
 
 
-def test_create_order_supports_exclusive_vat_mode(cart, product):
+def test_create_order_supports_exclusive_vat_mode(product):
     config = StoreConfig.objects.get(slug="default")
     config.price_includes_vat = False
     config.save(update_fields=["price_includes_vat", "updated_at"])
 
+    cart = Cart.objects.create(email="exclusive-order@example.com")
     upsert_cart_item(cart, product.id, 2)
     order = create_order_from_cart(cart)
 

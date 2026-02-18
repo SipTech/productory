@@ -18,7 +18,16 @@ class BundleAdmin(admin.ModelAdmin):
 
 @admin.register(Promotion)
 class PromotionAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "promotion_type", "value", "start_at", "end_at", "is_active")
-    list_filter = ("promotion_type", "is_active")
+    list_display = (
+        "name",
+        "code",
+        "promotion_type",
+        "value",
+        "applies_to_all_products",
+        "start_at",
+        "end_at",
+        "is_active",
+    )
+    list_filter = ("promotion_type", "applies_to_all_products", "is_active")
     search_fields = ("name", "code")
     filter_horizontal = ("products", "bundles")

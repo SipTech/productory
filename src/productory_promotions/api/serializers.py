@@ -34,6 +34,7 @@ class PromotionSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "code",
+            "applies_to_all_products",
             "products",
             "bundles",
             "promotion_type",
